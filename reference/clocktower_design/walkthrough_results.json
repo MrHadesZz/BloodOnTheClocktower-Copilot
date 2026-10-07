@@ -1,0 +1,94 @@
+{
+  "scope": "Restricted hypothetical fixed-bag fixture; NOT full Trouble Brewing inference",
+  "count_semantics": "EXACT distinct initial role assignments, NOT full histories or probabilities",
+  "stages": {
+    "H0_fixed_bag_and_four_actual_roles": {
+      "count": 24,
+      "possible_initial_Imp_seats": [
+        4,
+        5,
+        7,
+        8
+      ]
+    },
+    "accept_Inv_report_and_healthy_N1": {
+      "count": 12,
+      "possible_initial_Imp_seats": [
+        4,
+        5,
+        7,
+        8
+      ]
+    },
+    "also_accept_Chef_report_and_healthy_N1": {
+      "count": 8,
+      "possible_initial_Imp_seats": [
+        7,
+        8
+      ]
+    },
+    "also_accept_FT_NO_report_not_health": {
+      "count": 8,
+      "possible_initial_Imp_seats": [
+        7,
+        8
+      ]
+    },
+    "contradictory_branch_also_FT_healthy_N1": {
+      "count": 0,
+      "possible_initial_Imp_seats": []
+    },
+    "instead_assume_actual_Butler8": {
+      "count": 2,
+      "possible_initial_Imp_seats": [
+        7
+      ]
+    },
+    "D1_execution_of_5_and_N2_death_of_2_only": {
+      "count": 2,
+      "possible_initial_Imp_seats": [
+        7
+      ]
+    },
+    "also_accept_N2_UT_Monk_and_FT_YES_reports": {
+      "count": 1,
+      "possible_initial_Imp_seats": [
+        7
+      ]
+    }
+  },
+  "N1_poison_targets_in_all_remaining_witnesses": [
+    3
+  ],
+  "final_role_assignment": {
+    "1": "Investigator",
+    "2": "Chef",
+    "3": "Fortune Teller",
+    "4": "Poisoner",
+    "5": "Monk",
+    "6": "Undertaker",
+    "7": "Imp",
+    "8": "Butler"
+  },
+  "information_value_example": {
+    "two_hypotheses": [
+      "P4_alive_after_D1",
+      "P5_dead_after_D1"
+    ],
+    "report_Monk_compatible": [
+      "P4_alive_after_D1"
+    ],
+    "report_Poisoner_compatible": [
+      "P4_alive_after_D1",
+      "P5_dead_after_D1"
+    ],
+    "worst_case_elimination_fraction": 0.0,
+    "realized_log2_reduction_after_Monk": 1.0,
+    "warning": "Not expected entropy, not posterior; reporting-accuracy assumption still required"
+  },
+  "unrestricted_initial_true_role_assignments_no_histories": {
+    "10": 102745843200,
+    "12": 16644826598400,
+    "15": 12341830685184000
+  }
+}

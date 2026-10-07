@@ -1,0 +1,16 @@
+{
+  "gameId": "game-8",
+  "perspectiveId": "viewer-local",
+  "revision": 17,
+  "branchId": "H0-plus-reports",
+  "rulesetHash": "tb-profile-v1-fixture",
+  "requestId": "request-103",
+  "hypothesis": {
+    "op": "ability_active",
+    "playerId": "p3",
+    "abilityId": "fortune_teller.learn",
+    "at": {"phase": "night", "cycle": 1, "step": "fortune_teller"}
+  },
+  "timeoutMs": 1000,
+  "maxWitnesses": 2
+}

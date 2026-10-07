@@ -1,0 +1,23 @@
+name: 问题 / 规则反例
+description: 提交可以复现的 Bug、规则场景或错误提示
+title: "[Bug] "
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: 遇到的问题
+      description: 写清楚实际结果与预期结果；不要填写密钥、真实姓名或私密对局资料。
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: 复现步骤与匿名样例
+      description: 注明工作区、人数、日夜阶段、输入记录及采纳的前提。样例使用合成数据或脱敏公开导出。
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: 环境与规则依据
+      description: 浏览器、桌面或手机、项目版本；规则反例请附来源并区分官方说明和自己的推导。

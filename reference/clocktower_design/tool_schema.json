@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "check_hypothesis input",
+  "description": "Read-only hypothetical check. Does not add claims or mutate the active branch.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["gameId", "perspectiveId", "revision", "branchId", "rulesetHash", "requestId", "hypothesis", "timeoutMs", "maxWitnesses"],
+  "properties": {
+    "gameId": {"type": "string", "minLength": 1},
+    "perspectiveId": {"type": "string", "minLength": 1},
+    "revision": {"type": "integer", "minimum": 0},
+    "branchId": {"type": "string", "minLength": 1},
+    "rulesetHash": {"type": "string", "minLength": 1},
+    "requestId": {"type": "string", "minLength": 1},
+    "hypothesis": {"$ref": "#/$defs/expr"},
+    "timeoutMs": {"type": "integer", "minimum": 50, "maximum": 10000},
+    "maxWitnesses": {"type": "integer", "minimum": 0, "maximum": 20}
+  },
+  "$defs": {
+    "time": {
+      "type": "object", "additionalProperties": false,
+      "required": ["phase", "cycle"],
+      "properties": {
+        "phase": {"enum": ["setup", "night", "day"]},
+        "cycle": {"type": "integer", "minimum": 0},
+        "step": {"type": "string"}
+      }
+    },
+    "expr": {
+      "oneOf": [
+        {
+          "type": "object", "additionalProperties": false,
+          "required": ["op", "field", "playerId", "at", "value"],
+          "properties": {
+            "op": {"const": "eq"},
+            "field": {"enum": ["actual_role", "shown_role", "alignment"]},
+            "playerId": {"type": "string", "minLength": 1},
+            "at": {"$ref": "#/$defs/time"},
+            "value": {"type": "string", "minLength": 1}
+          }
+        },
+        {
+          "type": "object", "additionalProperties": false,
+          "required": ["op", "claimId"],
+          "properties": {
+            "op": {"const": "report_accurate"},
+            "claimId": {"type": "string", "minLength": 1}
+          }
+        },
+        {
+          "type": "object", "additionalProperties": false,
+          "required": ["op", "playerId", "abilityId", "at"],
+          "properties": {
+            "op": {"const": "ability_active"},
+            "playerId": {"type": "string", "minLength": 1},
+            "abilityId": {"type": "string", "minLength": 1},
+            "at": {"$ref": "#/$defs/time"}
+          }
+        },
+        {
+          "type": "object", "additionalProperties": false,
+          "required": ["op", "playerId", "at"],
+          "properties": {
+            "op": {"const": "poisoned"},
+            "playerId": {"type": "string", "minLength": 1},
+            "at": {"$ref": "#/$defs/time"}
+          }
+        },
+        {
+          "type": "object", "additionalProperties": false,
+          "required": ["op", "args"],
+          "properties": {
+            "op": {"enum": ["and", "or"]},
+            "args": {"type": "array", "minItems": 1, "maxItems": 50, "items": {"$ref": "#/$defs/expr"}}
+          }
+        },
+        {
+          "type": "object", "additionalProperties": false,
+          "required": ["op", "arg"],
+          "properties": {
+            "op": {"const": "not"},
+            "arg": {"$ref": "#/$defs/expr"}
+          }
+        }
+      ]
+    }
+  }
+}

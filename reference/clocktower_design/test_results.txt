@@ -1,0 +1,18 @@
+test_Butler8_leaves_two_role_assignments (test_walkthrough.WalkthroughTests.test_Butler8_leaves_two_role_assignments) ... ok
+test_FT_report_does_not_mean_FT_correct (test_walkthrough.WalkthroughTests.test_FT_report_does_not_mean_FT_correct) ... ok
+test_actual_trace_is_retained (test_walkthrough.WalkthroughTests.test_actual_trace_is_retained) ... ok
+test_chef_circular_wraparound (test_walkthrough.WalkthroughTests.test_chef_circular_wraparound) ... ok
+test_chef_gate (test_walkthrough.WalkthroughTests.test_chef_gate) ... ok
+test_dead_poisoner_cannot_explain_N2_UT (test_walkthrough.WalkthroughTests.test_dead_poisoner_cannot_explain_N2_UT) ... ok
+test_fixed_bag_has_24_unique_role_assignments (test_walkthrough.WalkthroughTests.test_fixed_bag_has_24_unique_role_assignments) ... ok
+test_healthy_FT_branch_is_unsatisfiable (test_walkthrough.WalkthroughTests.test_healthy_FT_branch_is_unsatisfiable) ... ok
+test_initial_search_space (test_walkthrough.WalkthroughTests.test_initial_search_space) ... ok
+test_investigator_gate (test_walkthrough.WalkthroughTests.test_investigator_gate) ... ok
+test_poison_3_is_necessary (test_walkthrough.WalkthroughTests.test_poison_3_is_necessary) ... ok
+test_projection_hides_nuisance_multiplicity (test_walkthrough.WalkthroughTests.test_projection_hides_nuisance_multiplicity) ... ok
+test_recording_claims_does_not_assume_them (test_walkthrough.WalkthroughTests.test_recording_claims_does_not_assume_them) ... ok
+
+----------------------------------------------------------------------
+Ran 13 tests in 0.001s
+
+OK

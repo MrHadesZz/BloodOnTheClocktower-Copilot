@@ -1,0 +1,26 @@
+name: 新功能讨论
+description: 一起讨论新的 features
+title: "[Feature] "
+body:
+  - type: textarea
+    id: scenario
+    attributes:
+      label: 谁会在什么场景使用
+      description: 描述现在遇到的问题，避免只写一个功能名。
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: 希望怎样操作、看到什么结果
+      description: 可以附匿名示例或草图，并说明规则、隐私和性能边界。
+    validations:
+      required: true
+  - type: dropdown
+    id: contribution
+    attributes:
+      label: 你想怎样参与
+      options:
+        - 提供需求与测试反馈
+        - 补充规则反例或文档
+        - 参与设计与开发

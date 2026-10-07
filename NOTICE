@@ -1,0 +1,18 @@
+Clocktower Copilot / 钟楼推理台
+Copyright (c) 2026 MrHadesZz (Shaoxuan Zhang) and contributors.
+Original project: https://github.com/MrHadesZz/clocktower-copilot-community
+
+Original project material is offered under the custom Clocktower Copilot
+Noncommercial Attribution License 1.0. See LICENSE for the complete terms.
+Commercial use is not granted. Redistributed and deployed user-facing
+versions must preserve visible author attribution and the project link.
+
+This is an unofficial, experimental community project. It is not made,
+sponsored, endorsed, or licensed by The Pandemonium Institute. Its finite
+rule model and conditional results are not official rules rulings.
+Blood on the Clocktower and associated game intellectual property belong
+to their respective owners. No rights in that material are granted here.
+
+Third-party licenses remain in force. See THIRD_PARTY_NOTICES.md,
+public/z3/LICENSE.txt, public/fonts/OFL-Sans.txt, and
+public/fonts/OFL-Serif.txt. Dependencies retain their upstream licenses.

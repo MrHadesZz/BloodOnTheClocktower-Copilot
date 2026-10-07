@@ -1,0 +1,45 @@
+{
+  "name": "clocktower-reasoning-copilot",
+  "private": true,
+  "version": "0.1.0",
+  "license": "SEE LICENSE IN LICENSE",
+  "author": "MrHadesZz (Shaoxuan Zhang)",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MrHadesZz/clocktower-copilot-community.git"
+  },
+  "type": "module",
+  "scripts": {
+    "dev": "npm run build:z3 && vite --host 0.0.0.0",
+    "build": "npm run build:z3 && tsc -b && vite build && node scripts/build-offline.mjs",
+    "test": "vitest run",
+    "preview": "vite preview --host 0.0.0.0",
+    "format": "prettier --write src index.html vite.config.ts",
+    "build:z3": "esbuild src/core/z3-engine.ts --bundle --platform=browser --format=iife --global-name=ClocktowerZ3 --outfile=public/z3/engine.js",
+    "test:e2e": "playwright test",
+    "test:rules": "vitest run src/core/v1Acceptance.test.ts src/core/alignmentMechanisms.test.ts src/core/recluseScarlet.test.ts src/core/multiDemon.test.ts src/core/informationTiming.test.ts src/core/dayOrder.test.ts src/core/historyAudit.test.ts && python3 -m unittest discover -s reference -p test_v1_oracle.py && python3 -m unittest discover -s reference/clocktower_design -p test_walkthrough.py",
+    "bench:v1": "node scripts/benchmark-v1.mjs",
+    "bench:v1:browser": "playwright test --config playwright.benchmark.config.ts"
+  },
+  "dependencies": {
+    "lucide-react": "^0.468.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "z3-solver": "^5.2.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.63.0",
+    "@types/node": "24.13.6",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react": "^4.3.4",
+    "esbuild": "^0.25.12",
+    "prettier": "^3.9.8",
+    "typescript": "^5.7.2",
+    "vite": "^6.0.5",
+    "vitest": "^5.0.1"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  }
+}

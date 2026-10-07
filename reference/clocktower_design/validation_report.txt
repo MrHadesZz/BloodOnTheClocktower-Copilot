@@ -1,0 +1,8 @@
+Validation performed 2026-09-22
+- Python reference fixture: executed; expected projected counts reproduced.
+- Unit tests: 13 passed.
+- TypeScript: tsc --strict --noEmit --target ES2022 domain.ts; passed.
+- JSON Schema Draft 2020-12: schema valid, example accepted, three invalid examples rejected.
+- Design structure: all 28 numbered top-level sections present in order; fenced code balanced.
+- Source IDs: all cited source IDs defined.
+- Not validated: full Trouble Brewing engine, browser/WASM runtime, production performance or human-study effectiveness.

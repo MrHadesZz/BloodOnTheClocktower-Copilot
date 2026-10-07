@@ -1,0 +1,123 @@
+Clocktower Copilot Noncommercial Attribution License 1.0
+License identifier: LicenseRef-Clocktower-NC-Attribution-1.0
+
+Copyright (c) 2026 MrHadesZz (Shaoxuan Zhang) and contributors.
+Project: https://github.com/MrHadesZz/clocktower-copilot-community
+
+This is a custom source-available license. It is not an OSI-approved
+open-source license. Its noncommercial and attribution conditions apply
+only to material that a copyright holder has authority to license here.
+
+1. Scope and acceptance
+
+"Software" means the original code, documentation, designs, and other
+original material in this project made available under these terms.
+"Licensor" means each copyright holder offering their own contribution
+under these terms. "You" means the individual or entity using rights
+granted by this license. By exercising these rights, you accept these
+terms as both obligations and conditions of the grant.
+
+Third-party software, fonts, artwork, trademarks, game content, and any
+material identified as separately licensed are excluded from this grant.
+Their owners' licenses and rights continue to apply. This license grants
+no rights in Blood on the Clocktower or The Pandemonium Institute's
+intellectual property, and does not establish permission to distribute
+an application containing third-party material.
+
+2. Noncommercial grant
+
+Subject to these terms, each Licensor grants you a worldwide, royalty-free,
+non-exclusive license to use, reproduce, study, modify, and distribute
+their contribution to the Software, in source or compiled form, solely
+for noncommercial purposes. Personal study, research, testing, hobby
+development, and free community collaboration qualify when they are not
+directed toward commercial advantage or monetary compensation.
+
+Commercial use is not granted. In particular, you may not sell or rent
+the Software or access to it; operate a paid or subscription service
+using it; include it in a commercial product or paid event service;
+monetize a deployment through advertisements, sponsorship, affiliate
+payments, or the sale of user data; or use it to provide paid development,
+hosting, consulting, or other services to others. A deployment being free
+to its users does not by itself make its purpose noncommercial.
+
+Any commercial use requires a separate written permission from the
+relevant copyright holders, and any required third-party permissions.
+No future conversion to a commercial-permissive license is implied.
+
+3. Copyright notices and redistribution
+
+Every redistributed copy of the Software or its covered portions must
+include this license, the project's NOTICE file, the original copyright
+notices, and the project URL above. This applies to source distributions,
+compiled applications, deployments that distribute code to a browser,
+and modified versions. Your changes must be clearly identified as changes
+and must not be attributed to the original author.
+
+You may offer your original additions under other terms, but you may not
+remove or replace this license for the original material, offer the
+original material under weaker terms, or grant rights the Licensors have
+not granted. Recipients receive rights in the original material directly
+from its Licensors under this license. Required third-party notices must
+also be preserved.
+
+4. Visible author attribution and watermark
+
+Any user-facing application or service incorporating covered Software
+must visibly credit the original author "MrHadesZz" and provide a clearly
+accessible link to https://github.com/MrHadesZz/clocktower-copilot-community in its
+main interface. The existing author attribution is the required watermark.
+Keep it readable during ordinary use on desktop and mobile. You may
+relocate or restyle it to fit a changed interface, provided its visibility,
+legibility, author identity, and link are preserved. You may add your own
+credit alongside it.
+
+You may not remove, conceal, crop away, make transparent, disable, or
+replace this credit in redistributed or deployed versions. Hiding it
+solely in source comments, an About dialog, a license file, or an off-screen
+element does not satisfy this condition. A derivative without a graphical
+interface must include the same author and URL prominently in its normal
+help or documentation. These conditions do not limit statutory exceptions
+or other rights that do not require this license.
+
+5. No endorsement or trademark grant
+
+No trademark, branding, or endorsement rights are granted. Modified
+versions must not imply that the original author maintains or endorses
+them. The Software is an unofficial community project, not an official
+product, official rules authority, or licensed product of The Pandemonium
+Institute unless that organization separately confirms otherwise.
+
+6. Patent grant
+
+Each Licensor grants you a non-exclusive, worldwide, royalty-free patent
+license solely for permitted uses of their contribution, covering only
+claims they control that are necessarily infringed by that contribution.
+If you initiate patent litigation alleging that the Software or a covered
+contribution infringes a patent, your patent grant under this license ends.
+
+7. Termination
+
+Rights granted by this license terminate when you violate its conditions.
+For a first violation, rights are reinstated if you stop the violation,
+fully comply with the terms, and take reasonable steps to correct past
+violations within 30 days after written notice. Reinstatement does not
+waive claims for past violations. No permission to continue a commercial
+use is granted during that period.
+
+8. Disclaimer
+
+TO THE EXTENT ALLOWED BY LAW, THE SOFTWARE IS PROVIDED "AS IS", WITHOUT
+WARRANTY OF ANY KIND, INCLUDING MERCHANTABILITY, FITNESS FOR A PARTICULAR
+PURPOSE, AND NON-INFRINGEMENT. NO LICENSOR IS LIABLE FOR ANY CLAIM,
+DAMAGES, OR OTHER LIABILITY ARISING FROM THE SOFTWARE OR ITS USE.
+
+If a provision is unenforceable, the remaining provisions remain in
+effect to the extent allowed by law. No statutory fair-use, fair-dealing,
+or other mandatory rights are limited by these terms.
+
+中文说明（便于阅读；上面的英文条款为准）：允许非商业学习、修改和
+共同开发；未经相关权利人书面许可不得商用。再发布须保留许可证、
+版权声明、项目地址，以及主界面中可读的 MrHadesZz 作者署名水印。
+可调整水印位置和样式、追加自己的署名，但不可隐藏或替换原作者。
+第三方游戏内容、商标、字体和依赖不由本许可证重新授权。
