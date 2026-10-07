@@ -3,9 +3,11 @@ import {
   queryZ3Conflict,
   queryZ3Claims,
   queryZ3ClaimConditions,
+  queryZ3FactHistory,
 } from "./z3Client";
 import { createStandardWorkspace } from "./standardWorkspace";
 import type { ConflictAnalysis } from "./conflict";
+import type { FactHistoryAnalysis } from "./factHistory";
 
 class FakeWorker {
   static instances: FakeWorker[] = [];
@@ -36,6 +38,70 @@ const confirmed: ConflictAnalysis = {
   rulesetHash: "test-v1",
   deletionWitnesses: [],
 };
+
+describe("history diagnosis worker lifecycle", () => {
+  const progress: FactHistoryAnalysis = {
+    status: "partial",
+    revision: 8,
+    assumptionIds: [],
+    checks: 2,
+    complete: false,
+    boundary: { phase: "day", cycle: 2 },
+    sourceIds: ["execution"],
+    steps: [
+      {
+        time: { phase: "day", cycle: 2 },
+        status: "conflict",
+        sourceIds: ["execution"],
+      },
+    ],
+  };
+  it("retains verified prefix evidence on external deadline without certifying the earliest boundary", async () => {
+    const pending = queryZ3FactHistory(createStandardWorkspace(7), {
+      budgetMs: 1,
+    });
+    const worker = FakeWorker.instances[0];
+    worker.progress(progress);
+    await vi.advanceTimersByTimeAsync(5001);
+    const result = await pending;
+    expect(result.status).toBe("partial");
+    expect(result.boundary).toEqual(progress.boundary);
+    expect(result.sourceIds).toEqual(progress.sourceIds);
+    expect(result.complete).toBe(false);
+    expect(worker.terminate).toHaveBeenCalledOnce();
+    expect(vi.getTimerCount()).toBe(0);
+  });
+  it("cancels the worker, immediately forwards evidence, and ignores late progress", async () => {
+    const controller = new AbortController();
+    const onProgress = vi.fn();
+    const pending = queryZ3FactHistory(
+      createStandardWorkspace(7),
+      { includeAssumptions: false },
+      controller.signal,
+      onProgress,
+    );
+    const worker = FakeWorker.instances[0];
+    expect(worker.request?.kind).toBe("fact_history");
+    expect(worker.request?.options).toEqual({ includeAssumptions: false });
+    worker.progress(progress);
+    expect(onProgress).toHaveBeenCalledWith(progress);
+    controller.abort();
+    await expect(pending).rejects.toMatchObject({ name: "AbortError" });
+    worker.progress({ ...progress, complete: true });
+    expect(onProgress).toHaveBeenCalledOnce();
+    expect(worker.terminate).toHaveBeenCalledOnce();
+    expect(vi.getTimerCount()).toBe(0);
+  });
+  it("returns unknown if initialization ends without confirmed progress", async () => {
+    const pending = queryZ3FactHistory(createStandardWorkspace(7), {
+      budgetMs: 1,
+    });
+    const rejection = expect(pending).rejects.toThrow("结果未知");
+    await vi.advanceTimersByTimeAsync(5001);
+    await rejection;
+    expect(FakeWorker.instances[0].terminate).toHaveBeenCalledOnce();
+  });
+});
 
 beforeEach(() => {
   vi.useFakeTimers();

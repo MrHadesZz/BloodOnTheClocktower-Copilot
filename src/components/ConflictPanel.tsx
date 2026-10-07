@@ -8,6 +8,7 @@ import { queryZ3Conflict } from "../core/z3Client";
 import type { ConflictAnalysis } from "../core/conflict";
 import { hypothesisLabel } from "./hypothesisLabel";
 import { StandardWitnessCard } from "./StandardQueryResult";
+import { FactHistoryPanel } from "./FactHistoryPanel";
 
 export function ConflictPanel({
   workspace,
@@ -171,9 +172,7 @@ export function ConflictPanel({
             </p>
           )}
           {current.status === "fixed_conflict" && (
-            <p>
-              取消前提无法解决这一冲突。请在记录面板核对行动顺序、处决、死亡及阶段完整性；这里不会替你删除事实记录。
-            </p>
+            <FactHistoryPanel workspace={workspace} />
           )}
         </>
       )}

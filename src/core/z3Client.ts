@@ -7,6 +7,7 @@ import type {
 } from "./symbolicSetup";
 
 import type { ConflictAnalysis, ConflictOptions } from "./conflict";
+import type { FactHistoryAnalysis, FactHistoryOptions } from "./factHistory";
 import type { ClaimAnalysis, ClaimAnalysisOptions } from "./claimAnalysis";
 import type { ClaimConditionDiagnosis } from "./claimConditionAnalysis";
 import type { StandardWorkspace } from "./standardWorkspace";
@@ -18,6 +19,11 @@ export interface Z3ProbeResult {
 }
 
 type Request =
+  | {
+      kind: "fact_history";
+      workspace: StandardWorkspace;
+      options?: FactHistoryOptions;
+    }
   | {
       kind: "conflict_query" | "claim_analysis";
       workspace: StandardWorkspace;
@@ -126,6 +132,25 @@ export const queryZ3Conflict = (
       status: "partial",
       reason: "定位达到时间预算，保留已确认的冲突；最小性未验证完成。",
     }),
+  );
+
+export const queryZ3FactHistory = (
+  workspace: StandardWorkspace,
+  options: FactHistoryOptions = {},
+  signal?: AbortSignal,
+  onProgress?: (progress: FactHistoryAnalysis) => void,
+) =>
+  requestZ3<FactHistoryAnalysis>(
+    { kind: "fact_history", workspace, options },
+    Math.min(Math.max(options.budgetMs ?? 30000, 0), 60000) + 5000,
+    signal,
+    (progress) => ({
+      ...progress,
+      complete: false,
+      status: progress.boundary ? "partial" : "unknown",
+      reason: "阶段定位达到时间预算，保留已确认的证据；最早边界尚未验证。",
+    }),
+    onProgress,
   );
 
 export const queryZ3Claims = (

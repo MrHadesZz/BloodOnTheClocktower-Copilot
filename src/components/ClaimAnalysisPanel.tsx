@@ -11,6 +11,7 @@ import {
 } from "../core/standardWorkspace";
 import { ClaimRepairCard } from "./ClaimRepairCard";
 import { StandardWitnessCard } from "./StandardQueryResult";
+import { FactHistoryPanel } from "./FactHistoryPanel";
 
 export function ClaimAnalysisPanel({
   workspace,
@@ -280,6 +281,9 @@ export function ClaimAnalysisPanel({
             </>
           )}
           {result.reason && <p>{result.reason}</p>}
+          {result.status === "fixed_conflict" && (
+            <FactHistoryPanel workspace={workspace} />
+          )}
           {!result.complete && (
             <p>
               {busy

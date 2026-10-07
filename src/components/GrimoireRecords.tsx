@@ -17,6 +17,7 @@ import {
   type StandardWorkspace,
 } from "../core/standardWorkspace";
 import { MAX_GRIMOIRE_DAY } from "./GrimoireEntry";
+import { FactHistoryPanel } from "./FactHistoryPanel";
 
 export function GrimoireRecords({
   workspace,
@@ -295,6 +296,10 @@ export function GrimoireRecords({
           {error}
         </p>
       )}
+      <details className="gr-fact-entry">
+        <summary>核对固定事实与阶段冲突</summary>
+        <FactHistoryPanel workspace={workspace} />
+      </details>
       {[...indexes]
         .sort((a, b) => a - b)
         .map((index) => {
