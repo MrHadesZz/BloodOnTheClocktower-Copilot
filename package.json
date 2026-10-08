@@ -1,7 +1,7 @@
 {
   "name": "clocktower-reasoning-copilot",
   "private": true,
-  "version": "0.3.0",
+  "version": "0.4.0",
   "license": "SEE LICENSE IN LICENSE",
   "author": "MrHadesZz (Shaoxuan Zhang)",
   "repository": {
@@ -17,7 +17,7 @@
     "format": "prettier --write src index.html vite.config.ts",
     "build:z3": "esbuild src/core/z3-engine.ts --bundle --platform=browser --format=iife --global-name=ClocktowerZ3 --outfile=public/z3/engine.js",
     "test:e2e": "playwright test",
-    "test:rules": "vitest run src/core/v1Acceptance.test.ts src/core/alignmentMechanisms.test.ts src/core/recluseScarlet.test.ts src/core/multiDemon.test.ts src/core/informationTiming.test.ts src/core/dayOrder.test.ts src/core/historyAudit.test.ts src/core/factCorrections.test.ts src/core/actionCorrections.test.ts && python3 -m unittest discover -s reference -p test_v1_oracle.py && python3 -m unittest discover -s reference/clocktower_design -p test_walkthrough.py",
+    "test:rules": "vitest run src/core/v1Acceptance.test.ts src/core/alignmentMechanisms.test.ts src/core/recluseScarlet.test.ts src/core/multiDemon.test.ts src/core/informationTiming.test.ts src/core/dayOrder.test.ts src/core/historyAudit.test.ts src/core/factCorrections.test.ts src/core/actionCorrections.test.ts src/core/recordAnalysis.test.ts && python3 -m unittest discover -s reference -p test_v1_oracle.py && python3 -m unittest discover -s reference/clocktower_design -p test_walkthrough.py",
     "bench:v1": "node scripts/benchmark-v1.mjs",
     "bench:v1:browser": "playwright test --config playwright.benchmark.config.ts"
   },

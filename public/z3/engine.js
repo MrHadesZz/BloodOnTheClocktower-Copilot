@@ -7650,6 +7650,31 @@ var ClocktowerZ3 = (() => {
     "Baron",
     "Imp"
   ];
+  var ROLE_ZH = {
+    Washerwoman: "\u6D17\u8863\u5987",
+    Librarian: "\u56FE\u4E66\u7BA1\u7406\u5458",
+    Investigator: "\u8C03\u67E5\u5458",
+    Chef: "\u53A8\u5E08",
+    Empath: "\u5171\u60C5\u8005",
+    "Fortune Teller": "\u5360\u535C\u5E08",
+    Undertaker: "\u9001\u846C\u8005",
+    Monk: "\u50E7\u4FA3",
+    Ravenkeeper: "\u5B88\u9E26\u4EBA",
+    Virgin: "\u8D1E\u6D01\u8005",
+    Slayer: "\u730E\u624B",
+    Soldier: "\u58EB\u5175",
+    Mayor: "\u9547\u957F",
+    Butler: "\u7BA1\u5BB6",
+    Drunk: "\u9152\u9B3C",
+    Recluse: "\u9690\u58EB",
+    Saint: "\u5723\u5F92",
+    Poisoner: "\u6295\u6BD2\u8005",
+    Spy: "\u95F4\u8C0D",
+    "Scarlet Woman": "\u7EA2\u5507\u5973\u90CE",
+    Baron: "\u7537\u7235",
+    Imp: "\u5C0F\u6076\u9B54"
+  };
+  var timeLabel = (time) => time ? `${time.phase === "night" ? "N" : "D"}${time.cycle}` : "\u65F6\u95F4\u672A\u5B9A";
   function activeEvents(events, revision = Infinity) {
     const upto = events.filter((e) => e.revision <= revision);
     const removed = new Set(
@@ -7658,6 +7683,34 @@ var ClocktowerZ3 = (() => {
     return upto.filter(
       (e) => e.payload.kind !== "retraction" && !removed.has(e.id)
     );
+  }
+  function eventLabel(event) {
+    const p = event.payload;
+    if (p.kind === "claim") {
+      if (p.claimKind === "role")
+        return p.identityStage === "current" ? `${p.speaker}\u53F7\u58F0\u79F0\u5F53\u524D\u89D2\u8272\u4E3A${ROLE_ZH[p.role]}` : `${p.speaker}\u53F7\u58F0\u79F0${ROLE_ZH[p.role]}`;
+      if (p.role === "Investigator" || p.role === "Washerwoman")
+        return `${p.speaker}\u53F7\u62A5\u544A${p.targets?.join("/")}\u53F7\u4E2D\u6709${ROLE_ZH[p.value]}`;
+      if (p.role === "Librarian")
+        return p.value === 0 ? `${p.speaker}\u53F7\u62A5\u544A\u96F6\u5916\u6765\u8005` : `${p.speaker}\u53F7\u62A5\u544A${p.targets?.join("/")}\u53F7\u4E2D\u6709${ROLE_ZH[p.value]}`;
+      if (p.role === "Chef") return `${p.speaker}\u53F7\u62A5\u544A${p.value}\u7EC4\u90AA\u6076\u76F8\u90BB`;
+      if (p.role === "Empath") return `${p.speaker}\u53F7\u62A5\u544A${p.value}\u540D\u90AA\u6076\u90BB\u5C45`;
+      if (p.role === "Fortune Teller")
+        return `${p.speaker}\u53F7\u62A5\u544A${p.targets?.join("/")}\u53F7\uFF1A${p.value ? "\u662F" : "\u5426"}`;
+      if (p.role === "Ravenkeeper")
+        return `${p.speaker}\u53F7\u62A5\u544A${p.targets?.[0]}\u53F7\u662F${ROLE_ZH[p.value]}`;
+      return `${p.speaker}\u53F7\u62A5\u544A\u770B\u5230${ROLE_ZH[p.value]}`;
+    }
+    if (p.kind === "nomination") return `${p.nominator}\u53F7\u63D0\u540D${p.nominee}\u53F7`;
+    if (p.kind === "vote") return `\u63D0\u540D${p.nominee}\u53F7\uFF1A${p.voters.length}\u7968`;
+    if (p.kind === "execution") return `${p.seat}\u53F7\u88AB\u5904\u51B3`;
+    if (p.kind === "death") return `${p.seat}\u53F7\u6B7B\u4EA1`;
+    if (p.kind === "slayer") return `${p.actor}\u53F7\u4F7F\u7528\u730E\u624B\u80FD\u529B\u6307\u5411${p.target}\u53F7`;
+    if (p.kind === "winner")
+      return `${p.team === "good" ? "\u5584\u826F" : "\u90AA\u6076"}\u9635\u8425\u83B7\u80DC`;
+    if (p.kind === "phase_closed")
+      return p.channel === "actions" ? "\u672C\u65E5\u884C\u52A8\u8BB0\u5F55\u5B8C\u6574" : "\u672C\u9636\u6BB5\u6B7B\u4EA1\u8BB0\u5F55\u5B8C\u6574";
+    return "\u64A4\u56DE\u8BEF\u5F55";
   }
 
   // src/core/setup.ts
@@ -8979,8 +9032,8 @@ var ClocktowerZ3 = (() => {
   }
   function matchObservedTimeline(witness, input, setupInput, deadline, acceptFinalState, finalRoleConstraint) {
     const n = witness.roles.length;
-    const limit2 = input.maxHistories ?? 1e4;
-    if (!Number.isInteger(limit2) || limit2 < 1)
+    const limit3 = input.maxHistories ?? 1e4;
+    if (!Number.isInteger(limit3) || limit3 < 1)
       throw new RangeError("\u9690\u85CF\u884C\u52A8\u641C\u7D22\u4E0A\u9650\u65E0\u6548\u3002");
     if (!input.phases.length || input.phases[0]?.kind !== "night")
       throw new RangeError("\u89C2\u5BDF\u65F6\u95F4\u7EBF\u5FC5\u987B\u4ECE\u9996\u591C\u5F00\u59CB\u3002");
@@ -9008,7 +9061,7 @@ var ClocktowerZ3 = (() => {
         unknown = { status: "unknown", reason: "time_budget", inspected };
         return false;
       }
-      if (inspected >= limit2) {
+      if (inspected >= limit3) {
         unknown = { status: "unknown", reason: "candidate_limit", inspected };
         return false;
       }
@@ -9818,13 +9871,130 @@ var ClocktowerZ3 = (() => {
   }
 
   // src/core/standardWorkspace.ts
+  var uid = () => globalThis.crypto.randomUUID();
   var validSeat2 = (seat, count) => Number.isInteger(seat) && Number(seat) >= 1 && Number(seat) <= count;
+  var isRecord = (value) => value !== null && typeof value === "object" && !Array.isArray(value);
   var isRole = (role) => typeof role === "string" && ROLES.includes(role);
+  var nonempty = (value) => typeof value === "string" && value.trim().length > 0;
+  var validDate = (value) => typeof value === "string" && !Number.isNaN(Date.parse(value));
+  var validTime = (value) => isRecord(value) && (value.phase === "day" || value.phase === "night") && Number.isInteger(value.cycle) && Number(value.cycle) >= 1 && Number(value.cycle) <= 99;
   function visibleStandardEvents(workspace, viewerSeat, revision = Infinity) {
     if (!validSeat2(viewerSeat, workspace.playerCount))
       throw new RangeError("\u79C1\u5BC6\u89C6\u89D2\u5EA7\u4F4D\u65E0\u6548\u3002");
     return activeEvents(workspace.events, revision).filter(
       (event) => event.visibility === "public" || event.ownerSeat === viewerSeat
+    );
+  }
+  function requireLatestStandardRevision(workspace) {
+    const branch = workspace.branches.find(
+      (item) => item.id === workspace.activeBranchId
+    );
+    if (!branch) throw new Error("\u6D3B\u52A8\u5206\u652F\u4E0D\u5B58\u5728\u3002");
+    if (branch.baseRevision !== workspace.events.length)
+      throw new Error("\u5F53\u524D\u5206\u652F\u5C1A\u672A\u5305\u542B\u6700\u65B0\u8BB0\u5F55\uFF0C\u8BF7\u5148\u66F4\u65B0\u5230\u6700\u65B0\u8BB0\u5F55\u518D\u4FEE\u6539\u5386\u53F2\u3002");
+  }
+  function commitStandardDrafts(workspace, rawText, drafts, visibility = "private") {
+    requireLatestStandardRevision(workspace);
+    if (!drafts.length) throw new Error("\u6CA1\u6709\u53EF\u63D0\u4EA4\u7684\u4E8B\u4EF6\u3002");
+    const physicalTimes = drafts.filter((d) => changesPhaseCompleteness(d.payload)).flatMap((d) => d.occurredAt ? [d.occurredAt] : []);
+    workspace = reopenStandardPhases(workspace, physicalTimes);
+    const current = activeEvents(workspace.events);
+    const entryId = uid();
+    const now = (/* @__PURE__ */ new Date()).toISOString();
+    const events = drafts.map((draft, index) => {
+      const payload = { ...draft.payload };
+      if (payload.kind === "vote") {
+        const nominations = current.filter(
+          (event) => event.payload.kind === "nomination" && (payload.nominationId === void 0 || event.id === payload.nominationId) && event.payload.nominee === payload.nominee && event.occurredAt?.phase === draft.occurredAt?.phase && event.occurredAt?.cycle === draft.occurredAt?.cycle
+        );
+        if (nominations.length !== 1)
+          throw new Error("\u6295\u7968\u5FC5\u987B\u5173\u8054\u540C\u4E00\u5929\u552F\u4E00\u4E00\u6761\u5DF2\u8BB0\u5F55\u7684\u63D0\u540D\u3002");
+        if (visibility === "public" && nominations[0].visibility !== "public")
+          throw new Error("\u516C\u5F00\u6295\u7968\u4E0D\u80FD\u5F15\u7528\u79C1\u5BC6\u63D0\u540D\u3002");
+        payload.nominationId = nominations[0].id;
+      }
+      return {
+        id: uid(),
+        rawEntryId: entryId,
+        revision: workspace.events.length + index + 1,
+        recordedAt: now,
+        occurredAt: draft.occurredAt,
+        rawText,
+        sourceSpan: draft.sourceSpan,
+        payload,
+        ...draft.correctsEventId !== void 0 ? { correctsEventId: draft.correctsEventId } : {},
+        ...visibility === "public" ? { visibility: "public" } : {
+          visibility: "private",
+          ownerSeat: workspace.perspectiveSeat
+        }
+      };
+    });
+    const revision = workspace.events.length + events.length;
+    const next = {
+      ...workspace,
+      schemaVersion: workspace.schemaVersion === 5 || drafts.some(
+        (draft) => draft.correctsEventId !== void 0 && (draft.payload.kind === "nomination" || draft.payload.kind === "slayer")
+      ) ? 5 : workspace.schemaVersion === 4 || drafts.some(
+        (draft) => draft.correctsEventId !== void 0 && draft.payload.kind !== "vote"
+      ) ? 4 : drafts.some((draft) => draft.correctsEventId !== void 0) ? 3 : workspace.schemaVersion,
+      events: [...workspace.events, ...events],
+      branches: workspace.branches.map(
+        (branch) => branch.id === workspace.activeBranchId ? { ...branch, baseRevision: revision } : branch
+      )
+    };
+    if (drafts.some((draft) => draft.correctsEventId !== void 0))
+      validateStandardWorkspace(next);
+    return next;
+  }
+  function retractStandardEvent(workspace, targetId, reason = "\u7EA0\u6B63\u8BEF\u5F55") {
+    requireLatestStandardRevision(workspace);
+    const target = activeEvents(workspace.events).find(
+      (event) => event.id === targetId
+    );
+    if (!target) throw new Error("\u539F\u4E8B\u4EF6\u5DF2\u4E0D\u5B58\u5728\u6216\u5DF2\u64A4\u56DE\u3002");
+    if (target.visibility === "private" && target.ownerSeat !== workspace.perspectiveSeat)
+      throw new Error("\u4E0D\u80FD\u64A4\u56DE\u5176\u4ED6\u73A9\u5BB6\u7684\u79C1\u5BC6\u8BB0\u5F55\u3002");
+    const entry = {
+      id: uid(),
+      rawEntryId: uid(),
+      revision: workspace.events.length + 1,
+      recordedAt: (/* @__PURE__ */ new Date()).toISOString(),
+      occurredAt: target.occurredAt,
+      rawText: reason,
+      sourceSpan: [0, reason.length],
+      payload: { kind: "retraction", targetId, reason },
+      ...target.visibility === "public" ? { visibility: "public" } : { visibility: "private", ownerSeat: target.ownerSeat }
+    };
+    const next = {
+      ...workspace,
+      events: [...workspace.events, entry],
+      branches: workspace.branches.map(
+        (branch) => branch.id === workspace.activeBranchId ? { ...branch, baseRevision: entry.revision } : branch
+      )
+    };
+    return changesPhaseCompleteness(target.payload) && target.occurredAt ? reopenStandardPhases(next, [target.occurredAt]) : next;
+  }
+  function changesPhaseCompleteness(payload) {
+    return ["nomination", "vote", "execution", "death", "slayer"].includes(
+      payload.kind
+    );
+  }
+  function reopenStandardPhases(workspace, times) {
+    const closures = visibleStandardEvents(
+      workspace,
+      workspace.perspectiveSeat
+    ).filter(
+      (e) => e.payload.kind === "phase_closed" && times.some(
+        (time) => e.occurredAt?.cycle === time.cycle && e.occurredAt?.phase === time.phase
+      )
+    );
+    return closures.reduce(
+      (next, e) => retractStandardEvent(
+        next,
+        e.id,
+        "\u672C\u9636\u6BB5\u884C\u52A8\u6216\u6B7B\u4EA1\u8BB0\u5F55\u5DF2\u53D8\u52A8\uFF0C\u8BF7\u91CD\u65B0\u786E\u8BA4\u5B8C\u6574\u3002"
+      ),
+      workspace
     );
   }
   function prepareStandardSetupQuery(workspace, allowPhysicalEvents = false, allowLaterReports = false) {
@@ -10257,6 +10427,141 @@ var ClocktowerZ3 = (() => {
       revision: branch.baseRevision
     };
   }
+  function validateStandardWorkspace(value) {
+    if (!isRecord(value) || value.schemaVersion !== 2 && value.schemaVersion !== 3 && value.schemaVersion !== 4 && value.schemaVersion !== 5 || value.profile !== "standard")
+      throw new Error("\u4E0D\u662F\u6807\u51C6\u5BF9\u5C40\u5DE5\u4F5C\u533A\u5BFC\u51FA\u6570\u636E\u3002");
+    const count = value.playerCount;
+    if (!Number.isInteger(count) || Number(count) < 7 || Number(count) > 15 || !nonempty(value.gameId) || !nonempty(value.title) || !validSeat2(value.perspectiveSeat, Number(count)) || !validSeat2(value.selectedSeat, Number(count)) || value.recordingTime !== void 0 && !validTime(value.recordingTime) || !isRecord(value.query) || !validSeat2(value.query.seat, Number(count)) || !isRole(value.query.role) || value.query.stage !== void 0 && value.query.stage !== "initial" && value.query.stage !== "current" || !Array.isArray(value.events) || !Array.isArray(value.hypotheses) || !Array.isArray(value.branches) || !nonempty(value.activeBranchId))
+      throw new Error("\u6807\u51C6\u5BF9\u5C40\u7684\u4EBA\u6570\u3001\u89C6\u89D2\u6216\u67E5\u8BE2\u5B57\u6BB5\u65E0\u6548\u3002");
+    const eventsById = /* @__PURE__ */ new Map();
+    const retracted = /* @__PURE__ */ new Set();
+    for (const [index, raw] of value.events.entries()) {
+      if (!isRecord(raw) || !nonempty(raw.id) || eventsById.has(raw.id) || raw.revision !== index + 1 || !nonempty(raw.rawEntryId) || !nonempty(raw.rawText) || !validDate(raw.recordedAt) || !Array.isArray(raw.sourceSpan) || raw.sourceSpan.length !== 2 || !Number.isInteger(raw.sourceSpan[0]) || !Number.isInteger(raw.sourceSpan[1]) || raw.sourceSpan[0] < 0 || raw.sourceSpan[1] < raw.sourceSpan[0] || raw.sourceSpan[1] > raw.rawText.length || raw.occurredAt !== void 0 && !validTime(raw.occurredAt) || !isRecord(raw.payload) || raw.visibility !== "public" && raw.visibility !== "private" || raw.visibility === "private" && (!validSeat2(raw.ownerSeat, Number(count)) || raw.ownerSeat !== value.perspectiveSeat) || raw.visibility === "public" && raw.ownerSeat !== void 0)
+        throw new Error(`\u7B2C${index + 1}\u6761\u6807\u51C6\u5BF9\u5C40\u4E8B\u4EF6\u65E0\u6548\u3002`);
+      const payload = raw.payload;
+      const atPhase = (phase) => validTime(raw.occurredAt) && raw.occurredAt.phase === phase;
+      const pair = (target) => Array.isArray(target) && target.length === 2 && target.every((seat) => validSeat2(seat, Number(count))) && target[0] !== target[1];
+      let valid = false;
+      switch (payload.kind) {
+        case "claim":
+          valid = validSeat2(payload.speaker, Number(count)) && isRole(payload.role);
+          if (payload.claimKind === "role") {
+            valid &&= payload.targets === void 0 && payload.value === void 0 && (payload.identityStage === void 0 || payload.identityStage === "initial" || payload.identityStage === "current" && validTime(raw.occurredAt));
+          } else if (payload.claimKind === "ability_report") {
+            valid &&= atPhase("night") && payload.identityStage === void 0;
+            if (payload.role === "Washerwoman" || payload.role === "Librarian" || payload.role === "Investigator") {
+              valid &&= payload.role === "Librarian" && payload.value === 0 && payload.targets === void 0 || pair(payload.targets) && isRole(payload.value) && ROLE_TEAM[payload.value] === (payload.role === "Washerwoman" ? "townsfolk" : payload.role === "Librarian" ? "outsider" : "minion");
+            } else if (payload.role === "Chef" || payload.role === "Empath") {
+              valid &&= Number.isInteger(payload.value) && Number(payload.value) >= 0 && Number(payload.value) <= (payload.role === "Empath" ? 2 : Number(count)) && payload.targets === void 0;
+            } else if (payload.role === "Fortune Teller") {
+              valid &&= pair(payload.targets) && typeof payload.value === "boolean";
+            } else if (payload.role === "Undertaker") {
+              valid &&= isRole(payload.value) && payload.targets === void 0;
+            } else if (payload.role === "Ravenkeeper") {
+              valid &&= isRole(payload.value) && Array.isArray(payload.targets) && payload.targets.length === 1 && validSeat2(payload.targets[0], Number(count));
+            } else valid = false;
+          } else valid = false;
+          if (payload.change !== void 0) {
+            const change = payload.change;
+            const previous = isRecord(change) && nonempty(change.previousId) ? eventsById.get(change.previousId) : void 0;
+            valid &&= isRecord(change) && (change.kind === "correction" || change.kind === "changed_claim") && validTime(change.announcedAt) && previous !== void 0 && isRecord(previous.payload) && previous.payload.kind === "claim" && previous.payload.claimKind === payload.claimKind && previous.payload.speaker === payload.speaker && (previous.payload.identityStage ?? "initial") === (payload.identityStage ?? "initial") && previous.visibility === raw.visibility && previous.ownerSeat === raw.ownerSeat && ![...eventsById.values()].some(
+              (e) => isRecord(e.payload) && e.payload.kind === "claim" && isRecord(e.payload.change) && e.payload.change.previousId === change.previousId && !retracted.has(e.id)
+            ) && (change.kind === "correction" ? retracted.has(change.previousId) : !retracted.has(change.previousId));
+            if (valid && isRecord(change) && change.kind === "changed_claim" && (payload.claimKind === "ability_report" || payload.identityStage === "current")) {
+              valid &&= validTime(previous.occurredAt) && validTime(raw.occurredAt) && previous.occurredAt.phase === raw.occurredAt.phase && previous.occurredAt.cycle === raw.occurredAt.cycle;
+            }
+          }
+          break;
+        case "nomination":
+          valid = atPhase("day") && validSeat2(payload.nominator, Number(count)) && validSeat2(payload.nominee, Number(count));
+          break;
+        case "vote": {
+          const nomination = nonempty(payload.nominationId) ? eventsById.get(payload.nominationId) : void 0;
+          valid = atPhase("day") && validSeat2(payload.nominee, Number(count)) && Array.isArray(payload.voters) && payload.voters.every(
+            (seat) => validSeat2(seat, Number(count))
+          ) && new Set(payload.voters).size === payload.voters.length && nomination !== void 0 && !retracted.has(payload.nominationId) && isRecord(nomination.payload) && nomination.payload.kind === "nomination" && nomination.payload.nominee === payload.nominee && validTime(nomination.occurredAt) && validTime(raw.occurredAt) && nomination.occurredAt.phase === "day" && nomination.occurredAt.cycle === raw.occurredAt.cycle && (raw.visibility !== "public" || nomination.visibility === "public");
+          break;
+        }
+        case "execution":
+          valid = atPhase("day") && validSeat2(payload.seat, Number(count));
+          break;
+        case "death":
+          valid = validTime(raw.occurredAt) && validSeat2(payload.seat, Number(count));
+          break;
+        case "winner":
+          valid = validTime(raw.occurredAt) && (payload.team === "good" || payload.team === "evil");
+          break;
+        case "slayer":
+          valid = atPhase("day") && validSeat2(payload.actor, Number(count)) && validSeat2(payload.target, Number(count));
+          break;
+        case "phase_closed":
+          valid = validTime(raw.occurredAt) && (payload.channel === "deaths" || atPhase("day") && payload.channel === "actions");
+          break;
+        case "retraction": {
+          const target = nonempty(payload.targetId) ? eventsById.get(payload.targetId) : void 0;
+          valid = target !== void 0 && isRecord(target.payload) && target.payload.kind !== "retraction" && !retracted.has(payload.targetId) && nonempty(payload.reason) && raw.visibility === target.visibility && raw.ownerSeat === target.ownerSeat;
+          if (valid) retracted.add(payload.targetId);
+          break;
+        }
+      }
+      if (!valid) throw new Error(`\u7B2C${index + 1}\u6761\u6807\u51C6\u5BF9\u5C40\u4E8B\u4EF6\u8F7D\u8377\u6216\u5F15\u7528\u65E0\u6548\u3002`);
+      if (raw.correctsEventId !== void 0) {
+        const previous = nonempty(raw.correctsEventId) ? eventsById.get(raw.correctsEventId) : void 0;
+        const ballot = payload.kind === "vote";
+        const fact = payload.kind === "death" || payload.kind === "execution";
+        const action = payload.kind === "nomination" || payload.kind === "slayer";
+        const nomination = ballot && nonempty(payload.nominationId) ? eventsById.get(payload.nominationId) : void 0;
+        const previousBallot = previous && isRecord(previous.payload) ? previous.payload : void 0;
+        const correctedVoters = payload.voters;
+        const reboundBallot = value.schemaVersion === 5 && ballot && previousBallot?.kind === "vote" && nomination?.correctsEventId === previousBallot.nominationId && Array.isArray(previousBallot.voters) && Array.isArray(correctedVoters) && previousBallot.voters.length === correctedVoters.length && previousBallot.voters.every(
+          (seat) => correctedVoters.includes(seat)
+        );
+        if (!(ballot ? value.schemaVersion >= 3 : fact ? value.schemaVersion >= 4 : action && value.schemaVersion === 5) || !previous || !isRecord(previous.payload) || previous.payload.kind !== payload.kind || !retracted.has(raw.correctsEventId) || ballot && (!reboundBallot && (previous.payload.nominee !== payload.nominee || previous.payload.nominationId !== payload.nominationId) || retracted.has(payload.nominationId)) || payload.kind === "nomination" && [...eventsById.values()].some(
+          (event) => !retracted.has(event.id) && isRecord(event.payload) && event.payload.kind === "vote" && event.payload.nominationId === raw.correctsEventId
+        ) || !validTime(previous.occurredAt) || !validTime(raw.occurredAt) || previous.occurredAt.phase !== raw.occurredAt.phase || previous.occurredAt.cycle !== raw.occurredAt.cycle || previous.visibility !== raw.visibility || previous.ownerSeat !== raw.ownerSeat || [...eventsById.values()].some(
+          (event) => event.correctsEventId === raw.correctsEventId && !retracted.has(event.id)
+        ))
+          throw new Error(
+            `\u7B2C${index + 1}\u6761${ballot ? "\u6295\u7968" : "\u4E8B\u5B9E"}\u7EA0\u6B63\u7684\u539F\u8BB0\u5F55\u3001\u9636\u6BB5\u6216\u5F15\u7528\u65E0\u6548\u3002`
+          );
+      }
+      eventsById.set(raw.id, raw);
+    }
+    const hypothesisIds = /* @__PURE__ */ new Set();
+    for (const [index, raw] of value.hypotheses.entries()) {
+      if (!isRecord(raw) || !nonempty(raw.id) || hypothesisIds.has(raw.id) || !validDate(raw.createdAt))
+        throw new Error(`\u7B2C${index + 1}\u6761\u5047\u8BBE\u65E0\u6548\u3002`);
+      if (raw.kind === "actual_role") {
+        if (!validSeat2(raw.seat, Number(count)) || !isRole(raw.role))
+          throw new Error("\u771F\u5B9E\u89D2\u8272\u5047\u8BBE\u65E0\u6548\u3002");
+      } else if (raw.kind === "role_at_phase") {
+        if (!validSeat2(raw.seat, Number(count)) || !isRole(raw.role) || !validTime(raw.occurredAt))
+          throw new Error("\u9636\u6BB5\u89D2\u8272\u5047\u8BBE\u65E0\u6548\u3002");
+      } else if (raw.kind === "seen_token") {
+        if (!validSeat2(raw.seat, Number(count)) || !isRole(raw.shownRole))
+          throw new Error("\u6240\u89C1\u89D2\u8272token\u5047\u8BBE\u65E0\u6548\u3002");
+      } else if (raw.kind === "night_one_poison") {
+        if (!validSeat2(raw.poisonerSeat, Number(count)) || !validSeat2(raw.targetSeat, Number(count)))
+          throw new Error("\u9996\u591C\u6295\u6BD2\u5047\u8BBE\u65E0\u6548\u3002");
+      } else if (raw.kind === "report_accurate" || raw.kind === "ability_active") {
+        const event = nonempty(raw.eventId) ? eventsById.get(raw.eventId) : void 0;
+        if (!event || !isRecord(event.payload) || event.payload.kind !== "claim" || event.payload.claimKind !== "ability_report")
+          throw new Error("\u62A5\u544A\u5047\u8BBE\u5F15\u7528\u4E86\u4E0D\u5B58\u5728\u7684\u80FD\u529B\u62A5\u544A\u3002");
+      } else throw new Error("\u672A\u77E5\u5047\u8BBE\u7C7B\u578B\u3002");
+      hypothesisIds.add(raw.id);
+    }
+    const branchIds = /* @__PURE__ */ new Set();
+    for (const [index, raw] of value.branches.entries()) {
+      if (!isRecord(raw) || !nonempty(raw.id) || branchIds.has(raw.id) || !nonempty(raw.name) || !validDate(raw.createdAt) || !Number.isInteger(raw.baseRevision) || Number(raw.baseRevision) < 0 || Number(raw.baseRevision) > value.events.length || !Array.isArray(raw.assumptionIds) || !raw.assumptionIds.every(
+        (id) => typeof id === "string" && hypothesisIds.has(id)
+      ) || new Set(raw.assumptionIds).size !== raw.assumptionIds.length || raw.parentId !== void 0 && !branchIds.has(raw.parentId))
+        throw new Error(`\u7B2C${index + 1}\u4E2A\u6807\u51C6\u5BF9\u5C40\u5206\u652F\u65E0\u6548\u3002`);
+      branchIds.add(raw.id);
+    }
+    if (!branchIds.has(value.activeBranchId))
+      throw new Error("\u6D3B\u52A8\u5206\u652F\u5F15\u7528\u65E0\u6548\u3002");
+    return value;
+  }
 
   // src/core/conflict.ts
   function withAssumptions(workspace, assumptionIds) {
@@ -10542,6 +10847,8 @@ var ClocktowerZ3 = (() => {
   // src/core/standardHistory.ts
   var phaseIndex = (time) => 2 * (time.cycle - 1) + (time.phase === "day" ? 1 : 0);
   var samePhase = (a, b) => !!a && !!b && phaseIndex(a) === phaseIndex(b);
+  var activeRevision = (w) => w.branches.find((b) => b.id === w.activeBranchId).baseRevision;
+  var visibleAtBranch = (w) => visibleStandardEvents(w, w.perspectiveSeat, activeRevision(w));
   function currentStandardClaims(events, history = events) {
     const byId = new Map(history.map((e) => [e.id, e]));
     const superseded = /* @__PURE__ */ new Set();
@@ -10560,6 +10867,203 @@ var ClocktowerZ3 = (() => {
         (later) => later.payload.kind === "claim" && later.payload.claimKind === "role" && e.payload.kind === "claim" && later.payload.speaker === e.payload.speaker && (later.payload.identityStage ?? "initial") === (e.payload.identityStage ?? "initial") && (e.payload.identityStage !== "current" || samePhase(e.occurredAt, later.occurredAt))
       ))
     );
+  }
+  function requireLatestRevision(w) {
+    requireLatestStandardRevision(w);
+  }
+  function nominationVoteSources(workspace, nominationId) {
+    return visibleAtBranch(workspace).filter(
+      (event) => event.payload.kind === "vote" && event.payload.nominationId === nominationId
+    );
+  }
+  function correctStandardAction(workspace, eventId, payload, confirmedVoteIds = []) {
+    requireLatestRevision(workspace);
+    const source = visibleAtBranch(workspace).find(
+      (event) => event.id === eventId
+    );
+    if (!source || source.occurredAt?.phase !== "day" || source.payload.kind !== "nomination" && source.payload.kind !== "slayer")
+      throw new Error("\u5F85\u7EA0\u6B63\u7684\u63D0\u540D\u6216\u730E\u624B\u884C\u52A8\u5DF2\u64A4\u56DE\u6216\u5728\u5F53\u524D\u89C6\u89D2\u4E0B\u4E0D\u53EF\u89C1\u3002");
+    if (payload.kind !== source.payload.kind)
+      throw new Error("\u7EA0\u6B63\u5FC5\u987B\u4FDD\u6301\u539F\u8BB0\u5F55\u7C7B\u578B\u3002");
+    const seats2 = payload.kind === "nomination" ? [payload.nominator, payload.nominee] : [payload.actor, payload.target];
+    if (seats2.some(
+      (seat) => !Number.isInteger(seat) || seat < 1 || seat > workspace.playerCount
+    ))
+      throw new Error("\u7EA0\u6B63\u7684\u73A9\u5BB6\u5EA7\u4F4D\u65E0\u6548\u3002");
+    if (payload.kind === "nomination" && source.payload.kind === "nomination" && payload.nominator === source.payload.nominator && payload.nominee === source.payload.nominee || payload.kind === "slayer" && source.payload.kind === "slayer" && payload.actor === source.payload.actor && payload.target === source.payload.target)
+      return workspace;
+    const ballots = payload.kind === "nomination" ? nominationVoteSources(workspace, source.id) : [];
+    const allBallots = activeEvents(workspace.events).filter(
+      (event) => event.payload.kind === "vote" && event.payload.nominationId === source.id
+    );
+    if (payload.kind === "nomination" && allBallots.length !== ballots.length)
+      throw new Error("\u8BE5\u63D0\u540D\u6709\u5173\u8054\u8BB0\u5F55\u5728\u5F53\u524D\u89C6\u89D2\u4E0B\u4E0D\u53EF\u89C1\uFF0C\u4E0D\u80FD\u5728\u6B64\u89C6\u89D2\u7EA0\u6B63\u3002");
+    if (new Set(confirmedVoteIds).size !== confirmedVoteIds.length || confirmedVoteIds.length !== ballots.length || ballots.some((vote) => !confirmedVoteIds.includes(vote.id)))
+      throw new Error(
+        "\u8BF7\u5148\u6838\u5BF9\u5E76\u786E\u8BA4\u5168\u90E8\u5173\u8054\u6295\u7968\uFF1B\u4E3E\u624B\u540D\u5355\u4F1A\u4FDD\u7559\uFF0C\u6295\u7968\u5C06\u91CD\u65B0\u5173\u8054\u5230\u7EA0\u6B63\u540E\u7684\u63D0\u540D\u3002"
+      );
+    let next = workspace;
+    for (const vote of ballots)
+      next = retractStandardEvent(
+        next,
+        vote.id,
+        "\u63D0\u540D\u7EA0\u6B63\uFF1A\u4FDD\u7559\u539F\u6295\u7968\u4F4D\u7F6E\u548C\u540D\u5355\uFF0C\u91CD\u65B0\u5173\u8054\u5DF2\u6838\u5BF9\u7684\u63D0\u540D\u3002"
+      );
+    next = retractStandardEvent(
+      next,
+      source.id,
+      "\u884C\u52A8\u7EA0\u6B63\uFF1A\u4FDD\u7559\u539F\u8BB0\u5F55\u548C\u53D1\u751F\u4F4D\u7F6E\uFF0C\u8BF7\u91CD\u65B0\u6838\u5BF9\u672C\u65E5\u5B8C\u6574\u6027\u3002"
+    );
+    const noun = payload.kind === "nomination" ? "\u63D0\u540D" : "\u730E\u624B\u884C\u52A8";
+    const label = `${noun}\u7EA0\u6B63\uFF1A${eventLabel({ payload })} \xB7 ${timeLabel(source.occurredAt)}`;
+    next = commitStandardDrafts(
+      next,
+      label,
+      [
+        {
+          payload: { ...payload },
+          occurredAt: source.occurredAt,
+          correctsEventId: source.id,
+          label,
+          sourceSpan: [0, label.length]
+        }
+      ],
+      source.visibility
+    );
+    const nominationId = next.events.at(-1).id;
+    if (payload.kind === "nomination") {
+      for (const vote of ballots) {
+        const ballot = {
+          ...vote.payload,
+          nominee: payload.nominee,
+          nominationId,
+          voters: [...vote.payload.voters]
+        };
+        const voteLabel = `\u63D0\u540D\u7EA0\u6B63\u65F6\u91CD\u65B0\u5173\u8054\u6295\u7968\uFF1A${eventLabel({ payload: ballot })} \xB7 ${timeLabel(vote.occurredAt)}`;
+        next = commitStandardDrafts(
+          next,
+          voteLabel,
+          [
+            {
+              payload: ballot,
+              occurredAt: vote.occurredAt,
+              correctsEventId: vote.id,
+              label: voteLabel,
+              sourceSpan: [0, voteLabel.length]
+            }
+          ],
+          vote.visibility
+        );
+      }
+    }
+    return next;
+  }
+  function correctStandardFact(workspace, eventId, payload) {
+    requireLatestRevision(workspace);
+    const source = visibleAtBranch(workspace).find(
+      (event) => event.id === eventId
+    );
+    if (!source || !source.occurredAt || source.payload.kind !== "death" && source.payload.kind !== "execution")
+      throw new Error("\u5F85\u7EA0\u6B63\u7684\u6B7B\u4EA1\u6216\u5904\u51B3\u8BB0\u5F55\u5DF2\u64A4\u56DE\u6216\u5728\u5F53\u524D\u89C6\u89D2\u4E0B\u4E0D\u53EF\u89C1\u3002");
+    if (payload.kind !== source.payload.kind)
+      throw new Error("\u7EA0\u6B63\u5FC5\u987B\u4FDD\u6301\u539F\u8BB0\u5F55\u7C7B\u578B\uFF1B\u5904\u51B3\u4E0E\u6B7B\u4EA1\u8BF7\u5206\u522B\u6838\u5BF9\u3002");
+    if (!Number.isInteger(payload.seat) || payload.seat < 1 || payload.seat > workspace.playerCount)
+      throw new Error("\u7EA0\u6B63\u7684\u73A9\u5BB6\u5EA7\u4F4D\u65E0\u6548\u3002");
+    if (payload.seat === source.payload.seat) return workspace;
+    const next = retractStandardEvent(
+      workspace,
+      source.id,
+      "\u4E8B\u5B9E\u7EA0\u6B63\uFF1A\u4FDD\u7559\u539F\u8BB0\u5F55\u548C\u53D1\u751F\u4F4D\u7F6E\uFF0C\u8BF7\u91CD\u65B0\u6838\u5BF9\u672C\u9636\u6BB5\u5B8C\u6574\u6027\u3002"
+    );
+    const label = `${payload.kind === "death" ? "\u6B7B\u4EA1" : "\u5904\u51B3"}\u7EA0\u6B63\uFF1A${eventLabel({ payload })} \xB7 ${timeLabel(source.occurredAt)}`;
+    return commitStandardDrafts(
+      next,
+      label,
+      [
+        {
+          payload: { ...payload },
+          occurredAt: source.occurredAt,
+          correctsEventId: source.id,
+          label,
+          sourceSpan: [0, label.length]
+        }
+      ],
+      source.visibility
+    );
+  }
+  function correctStandardVote(workspace, voteId, voters) {
+    requireLatestRevision(workspace);
+    const visible = visibleAtBranch(workspace);
+    const vote = visible.find((event) => event.id === voteId);
+    if (!vote || vote.payload.kind !== "vote" || !vote.occurredAt)
+      throw new Error("\u5F85\u7EA0\u6B63\u7684\u6295\u7968\u5DF2\u64A4\u56DE\u6216\u5728\u5F53\u524D\u89C6\u89D2\u4E0B\u4E0D\u53EF\u89C1\u3002");
+    const ballot = vote.payload;
+    if (!visible.some(
+      (event) => event.id === ballot.nominationId && event.payload.kind === "nomination"
+    ))
+      throw new Error("\u8FD9\u6B21\u6295\u7968\u5173\u8054\u7684\u63D0\u540D\u5DF2\u64A4\u56DE\uFF0C\u8BF7\u5148\u6838\u5BF9\u63D0\u540D\u8BB0\u5F55\u3002");
+    if (new Set(voters).size !== voters.length || voters.some(
+      (seat) => !Number.isInteger(seat) || seat < 1 || seat > workspace.playerCount
+    ))
+      throw new Error("\u4E3E\u624B\u73A9\u5BB6\u5305\u542B\u91CD\u590D\u6216\u65E0\u6548\u5EA7\u4F4D\u3002");
+    if (voters.length === ballot.voters.length && voters.every((seat) => ballot.voters.includes(seat)))
+      return workspace;
+    const next = retractStandardEvent(
+      workspace,
+      vote.id,
+      "\u6295\u7968\u7EA0\u6B63\uFF1A\u4FDD\u7559\u539F\u6295\u7968\u4F4D\u7F6E\u548C\u539F\u6587\uFF0C\u8BF7\u91CD\u65B0\u6838\u5BF9\u672C\u65E5\u8BB0\u5F55\u5B8C\u6574\u6027\u3002"
+    );
+    const payload = { ...ballot, voters: [...voters] };
+    const label = `\u6295\u7968\u7EA0\u6B63\uFF1A${eventLabel({ payload })} \xB7 ${timeLabel(vote.occurredAt)}`;
+    return commitStandardDrafts(
+      next,
+      label,
+      [
+        {
+          payload,
+          occurredAt: vote.occurredAt,
+          correctsEventId: vote.id,
+          label,
+          sourceSpan: [0, label.length]
+        }
+      ],
+      vote.visibility
+    );
+  }
+  function standardPhaseStatus(w, time) {
+    const records = visibleAtBranch(w).filter(
+      (e) => samePhase(e.occurredAt, time)
+    );
+    const required = time.phase === "day" ? ["actions", "deaths"] : ["deaths"];
+    const missing = required.filter(
+      (channel) => !records.some(
+        (e) => e.payload.kind === "phase_closed" && e.payload.channel === channel
+      )
+    );
+    return { records, complete: !missing.length, missing };
+  }
+  function closeStandardPhase(w, time, confirmed) {
+    requireLatestRevision(w);
+    if (!confirmed) throw new Error("\u8BF7\u5148\u786E\u8BA4\u672C\u9636\u6BB5\u884C\u52A8\u4E0E\u6B7B\u4EA1\u8BB0\u5F55\u5DF2\u6536\u9F50\u3002");
+    const status = standardPhaseStatus(w, time);
+    if (status.complete) return w;
+    const label = `${timeLabel(time)}\u672C\u9636\u6BB5\u8BB0\u5F55\u5B8C\u6574`;
+    const next = commitStandardDrafts(
+      w,
+      label,
+      status.missing.map((channel) => ({
+        payload: {
+          kind: "phase_closed",
+          channel
+        },
+        occurredAt: time,
+        label,
+        sourceSpan: [0, label.length]
+      })),
+      "private"
+    );
+    validateStandardWorkspace(next);
+    return next;
   }
 
   // src/core/claimAnalysis.ts
@@ -10988,8 +11492,246 @@ var ClocktowerZ3 = (() => {
     return { answer, sourceIds: prepared.sourceIds, revision: prepared.revision };
   }
 
+  // src/core/recordAnalysis.ts
+  function isAnalyzableRecord(event) {
+    return ["death", "execution", "nomination", "slayer", "vote"].includes(
+      event.payload.kind
+    );
+  }
+  function prepareRecordAnalysis(workspace, sourceId, includeAssumptions = true) {
+    const branch = workspace.branches.find(
+      (b) => b.id === workspace.activeBranchId
+    );
+    if (!branch) throw new Error("\u6D3B\u52A8\u5206\u652F\u4E0D\u5B58\u5728\u3002");
+    const source = visibleStandardEvents(
+      workspace,
+      workspace.perspectiveSeat,
+      branch.baseRevision
+    ).find((event) => event.id === sourceId);
+    if (!source || !source.occurredAt || !isAnalyzableRecord(source))
+      throw new Error(
+        "\u5F85\u8BD5\u67E5\u7684\u8BB0\u5F55\u5DF2\u64A4\u56DE\u3001\u5C1A\u672A\u8FDB\u5165\u5F53\u524D\u4FEE\u8BA2\u6216\u5728\u5F53\u524D\u89C6\u89D2\u4E0B\u4E0D\u53EF\u89C1\u3002"
+      );
+    const events = workspace.events.filter(
+      (event) => event.revision <= branch.baseRevision
+    );
+    const eventIds = new Set(events.map((event) => event.id));
+    const hypotheses = workspace.hypotheses.filter(
+      (hypothesis) => !("eventId" in hypothesis) || eventIds.has(hypothesis.eventId)
+    );
+    const assumptionIds = includeAssumptions ? [...branch.assumptionIds] : [];
+    if (assumptionIds.some(
+      (id) => !hypotheses.some((hypothesis) => hypothesis.id === id)
+    ))
+      throw new Error("\u5F53\u524D\u91C7\u7EB3\u524D\u63D0\u7684\u6765\u6E90\u8D85\u51FA\u8FD9\u4EFD\u4FEE\u8BA2\uFF0C\u8BF7\u5148\u6838\u5BF9\u524D\u63D0\u3002");
+    const snapshot = {
+      ...workspace,
+      query: { ...workspace.query, stage: "initial" },
+      events,
+      hypotheses,
+      branches: [{ ...branch, parentId: void 0, assumptionIds }]
+    };
+    const relatedSourceIds = source.payload.kind === "nomination" ? nominationVoteSources(snapshot, source.id).map((vote) => vote.id) : [];
+    const candidates = [];
+    const seats2 = Array.from({ length: workspace.playerCount }, (_, i) => i + 1);
+    const payload = source.payload;
+    const addSeatChoices = (field, from, label, make) => {
+      for (const seat of seats2)
+        if (seat !== from)
+          candidates.push({
+            id: `${field}-${seat}`,
+            label: `${label}\uFF1A${from}\u53F7 \u2192 ${seat}\u53F7`,
+            payload: make(seat)
+          });
+    };
+    if (payload.kind === "death" || payload.kind === "execution")
+      addSeatChoices(
+        "seat",
+        payload.seat,
+        payload.kind === "death" ? "\u6B7B\u4EA1\u73A9\u5BB6" : "\u5904\u51B3\u73A9\u5BB6",
+        (seat) => ({ ...payload, seat })
+      );
+    else if (payload.kind === "nomination") {
+      addSeatChoices("nominee", payload.nominee, "\u88AB\u63D0\u540D\u4EBA", (nominee) => ({
+        ...payload,
+        nominee
+      }));
+      addSeatChoices("nominator", payload.nominator, "\u63D0\u540D\u4EBA", (nominator) => ({
+        ...payload,
+        nominator
+      }));
+    } else if (payload.kind === "slayer") {
+      addSeatChoices("actor", payload.actor, "\u884C\u52A8\u73A9\u5BB6", (actor) => ({
+        ...payload,
+        actor
+      }));
+      addSeatChoices("target", payload.target, "\u730E\u624B\u76EE\u6807", (target) => ({
+        ...payload,
+        target
+      }));
+    } else {
+      for (const seat of seats2) {
+        const removing = payload.voters.includes(seat);
+        const voters = removing ? payload.voters.filter((voter) => voter !== seat) : [...payload.voters, seat];
+        candidates.push({
+          id: `voter-${seat}`,
+          label: `\u4E3E\u624B\u540D\u5355\uFF1A${removing ? "\u79FB\u9664" : "\u8865\u5165"}${seat}\u53F7\uFF08${payload.voters.length}\u7968 \u2192 ${voters.length}\u7968\uFF09`,
+          payload: { ...payload, voters }
+        });
+      }
+    }
+    return {
+      snapshot,
+      source,
+      candidates,
+      relatedSourceIds,
+      withCandidate(candidate) {
+        const choice = candidates.find((item) => item.id === candidate.id);
+        if (!choice) throw new Error("\u8BD5\u67E5\u5019\u9009\u4E0D\u5C5E\u4E8E\u5F53\u524D\u6765\u6E90\u3002");
+        const replacement = choice.payload;
+        const trial = replacement.kind === "vote" ? correctStandardVote(snapshot, source.id, replacement.voters) : replacement.kind === "death" || replacement.kind === "execution" ? correctStandardFact(snapshot, source.id, replacement) : correctStandardAction(
+          snapshot,
+          source.id,
+          replacement,
+          relatedSourceIds
+        );
+        return closeStandardPhase(trial, source.occurredAt, true);
+      }
+    };
+  }
+  var limit2 = (value, fallback, max) => Number.isFinite(value) ? Math.max(0, Math.min(value, max)) : fallback;
+  async function analyzeRecord(workspace, sourceId, solvers, options = {}, onProgress) {
+    const prepared = prepareRecordAnalysis(
+      workspace,
+      sourceId,
+      options.includeAssumptions !== false
+    );
+    const started = performance.now();
+    const budget = limit2(options.budgetMs, 2e4, 6e4);
+    const maxChecks = Math.floor(limit2(options.maxChecks, 40, 200));
+    const maxResults = Math.floor(limit2(options.maxResults, 4, 12));
+    let checks = 0, testedCandidates = 0, unknownCandidates = 0;
+    let baselineConflict = false;
+    let rulesetHash;
+    const alternatives = [];
+    const finish = (status, reason) => ({
+      status,
+      sourceId,
+      revision: prepared.snapshot.events.length,
+      assumptionIds: [...prepared.snapshot.branches[0].assumptionIds],
+      relatedSourceIds: [...prepared.relatedSourceIds],
+      baselineConflict,
+      checks,
+      testedCandidates,
+      totalCandidates: prepared.candidates.length,
+      unknownCandidates,
+      complete: ["confirmed", "compatible", "no_single_edit"].includes(status),
+      alternatives: [...alternatives],
+      rulesetHash,
+      reason
+    });
+    const check = async (trial) => {
+      const input = prepareStandardObservedQuery(trial);
+      if (input.status !== "ready")
+        return { kind: "not_ready", reason: input.reason };
+      const remaining = budget - (performance.now() - started);
+      if (remaining <= 0 || checks >= maxChecks)
+        return {
+          kind: "budget",
+          reason: "\u8BD5\u67E5\u8FBE\u5230\u65F6\u95F4\u6216\u68C0\u67E5\u6B21\u6570\u9884\u7B97\uFF0C\u672A\u68C0\u67E5\u90E8\u5206\u4ECD\u672A\u77E5\u3002"
+        };
+      checks++;
+      try {
+        const answer = await solvers.observed({
+          ...input.input,
+          timeoutMs: Math.max(
+            1,
+            Math.floor(
+              Math.min(remaining, limit2(options.checkTimeoutMs, 3e3, 6e4))
+            )
+          )
+        });
+        if (rulesetHash && rulesetHash !== answer.rulesetHash)
+          return {
+            kind: "changed_rules",
+            reason: "\u89C4\u5219\u7248\u672C\u53D1\u751F\u53D8\u5316\uFF0C\u4FDD\u7559\u6B64\u524D\u8BC1\u636E\uFF0C\u4E0D\u80FD\u5408\u5E76\u65B0\u7ED3\u679C\u3002"
+          };
+        rulesetHash = answer.rulesetHash;
+        if (answer.status === "unsat" && answer.classification === "inconsistent")
+          return { kind: "conflict" };
+        const witness = answer.yes ?? answer.no;
+        if (witness) return { kind: "compatible", witness };
+        return {
+          kind: "unknown",
+          reason: answer.unknownReason === "unsupported_replay" ? "\u5B58\u5728\u5C1A\u672A\u652F\u6301\u7684\u89C4\u5219\u4EA4\u4E92\u3002" : answer.unknownReason === "candidate_limit" ? "\u5019\u9009\u6216\u9690\u85CF\u884C\u52A8\u641C\u7D22\u8FBE\u5230\u4E0A\u9650\u3002" : "\u672C\u6B21\u68C0\u67E5\u672A\u5B8C\u6210\uFF0C\u5C1A\u672A\u627E\u5230\u517C\u5BB9\u89C1\u8BC1\u3002"
+        };
+      } catch (error) {
+        return {
+          kind: "unknown",
+          reason: error instanceof Error ? error.message : "\u672C\u6B21\u68C0\u67E5\u672A\u5B8C\u6210\u3002"
+        };
+      }
+    };
+    const baseline = await check(prepared.snapshot);
+    if (baseline.kind === "not_ready")
+      return finish("not_ready", baseline.reason);
+    if (baseline.kind === "compatible")
+      return finish(
+        "compatible",
+        "\u539F\u5B8C\u6574\u80CC\u666F\u5DF2\u6709\u517C\u5BB9\u89C1\u8BC1\uFF0C\u65E0\u9700\u636E\u6B64\u731C\u6D4B\u5F55\u5165\u9519\u8BEF\u3002"
+      );
+    if (baseline.kind !== "conflict") return finish("unknown", baseline.reason);
+    baselineConflict = true;
+    onProgress?.(
+      finish("partial", "\u539F\u80CC\u666F\u5DF2\u786E\u8BA4\u51B2\u7A81\uFF0C\u6B63\u5728\u8BD5\u67E5\u8FD9\u6761\u8BB0\u5F55\u7684\u5355\u5904\u66FF\u4EE3\u3002")
+    );
+    let unresolved;
+    for (const candidate of prepared.candidates) {
+      if (alternatives.length >= maxResults)
+        return finish("partial", "\u5DF2\u8FBE\u5230\u5C55\u793A\u5019\u9009\u4E0A\u9650\uFF0C\u5176\u4ED6\u5355\u5904\u66FF\u4EE3\u5C1A\u672A\u68C0\u67E5\u3002");
+      let answer;
+      try {
+        answer = await check(prepared.withCandidate(candidate));
+      } catch (error) {
+        answer = {
+          kind: "unknown",
+          reason: error instanceof Error ? error.message : "\u5019\u9009\u8BB0\u5F55\u65E0\u6CD5\u51C6\u5907\u3002"
+        };
+      }
+      if (answer.kind === "budget" || answer.kind === "changed_rules")
+        return finish("partial", answer.reason);
+      testedCandidates++;
+      if (answer.kind === "compatible")
+        alternatives.push({ ...candidate, witness: answer.witness });
+      else if (answer.kind !== "conflict") {
+        unknownCandidates++;
+        unresolved ??= answer.reason;
+      }
+      onProgress?.(finish("partial", "\u5DF2\u786E\u8BA4\u7684\u5019\u9009\u5B9E\u65F6\u663E\u793A\uFF0C\u672A\u5B8C\u6210\u90E8\u5206\u4ECD\u672A\u77E5\u3002"));
+    }
+    if (unknownCandidates) return finish("partial", unresolved);
+    return alternatives.length ? finish(
+      "confirmed",
+      "\u8FD9\u6761\u8BB0\u5F55\u7684\u5355\u5904\u66FF\u4EE3\u5DF2\u68C0\u67E5\u5B8C\uFF1B\u5019\u9009\u53EA\u662F\u5728\u6240\u5217\u6761\u4EF6\u4E0B\u53EF\u6210\u7ACB\uFF0C\u4E0D\u8BC1\u660E\u539F\u8BB0\u5F55\u9519\u8BEF\u3002"
+    ) : finish(
+      "no_single_edit",
+      "\u8FD9\u4E9B\u5355\u5904\u66FF\u4EE3\u5747\u672A\u6D88\u9664\u5B8C\u6574\u80CC\u666F\u51B2\u7A81\uFF1B\u8FD9\u4E0D\u8BC1\u660E\u539F\u8BB0\u5F55\u6B63\u786E\uFF0C\u53EF\u80FD\u6D89\u53CA\u591A\u5904\u8BB0\u5F55\u6216\u624B\u52A8\u524D\u63D0\u3002"
+    );
+  }
+
   // src/core/z3-engine.ts
   async function handle(request, onProgress) {
+    if (request.kind === "record_analysis") {
+      if (!request.workspace || !request.sourceId)
+        throw new Error("\u7F3A\u5C11\u8BB0\u5F55\u8BD5\u67E5\u8F93\u5165\u3002");
+      return analyzeRecord(
+        request.workspace,
+        request.sourceId,
+        { setup: queryInitialSetup, observed: queryObservedTimeline },
+        request.options,
+        onProgress
+      );
+    }
     if (request.kind === "fact_history") {
       if (!request.workspace) throw new Error("\u7F3A\u5C11\u9636\u6BB5\u6838\u5BF9\u8F93\u5165\u3002");
       return analyzeFactHistory(

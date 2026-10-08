@@ -24,6 +24,11 @@ import {
   type ClaimConditionDiagnosis,
 } from "./claimConditionAnalysis";
 import { solveStandardWorkspace } from "./standardQuery";
+import {
+  analyzeRecord,
+  type RecordAnalysis,
+  type RecordAnalysisOptions,
+} from "./recordAnalysis";
 import type { StandardWorkspace } from "./standardWorkspace";
 
 export interface EngineRequest {
@@ -35,11 +40,13 @@ export interface EngineRequest {
     | "observed_query"
     | "conflict_query"
     | "fact_history"
+    | "record_analysis"
     | "claim_analysis"
     | "claim_diagnosis";
   workspace?: StandardWorkspace;
   seats?: number[];
-  options?: ClaimAnalysisOptions & FactHistoryOptions;
+  sourceId?: string;
+  options?: ClaimAnalysisOptions & FactHistoryOptions & RecordAnalysisOptions;
   input?: SetupQueryInput | TimelineQueryInput | ObservedQueryInput;
 }
 
@@ -51,9 +58,21 @@ export async function handle(
       | ConflictAnalysis
       | ClaimAnalysis
       | ClaimConditionDiagnosis
-      | FactHistoryAnalysis,
+      | FactHistoryAnalysis
+      | RecordAnalysis,
   ) => void,
 ) {
+  if (request.kind === "record_analysis") {
+    if (!request.workspace || !request.sourceId)
+      throw new Error("缺少记录试查输入。");
+    return analyzeRecord(
+      request.workspace,
+      request.sourceId,
+      { setup: queryInitialSetup, observed: queryObservedTimeline },
+      request.options,
+      onProgress,
+    );
+  }
   if (request.kind === "fact_history") {
     if (!request.workspace) throw new Error("缺少阶段核对输入。");
     return analyzeFactHistory(
