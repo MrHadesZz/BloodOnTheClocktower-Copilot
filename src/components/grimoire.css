@@ -1009,6 +1009,53 @@
 .gr-phase-confirm button {
   margin: 8px 8px 0 0;
 }
+.gr-phase-confirm fieldset {
+  min-width: 0;
+  margin: 12px 0;
+  padding: 10px;
+  border: 1px solid var(--gr-border, #ded4c4);
+  border-radius: 6px;
+}
+.gr-action-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.gr-action-fields label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+.gr-action-fields select {
+  width: 100%;
+  min-height: 44px;
+  padding: 8px;
+  border: 1px solid #c9bdab;
+  border-radius: 6px;
+  color: inherit;
+  background: #fff;
+}
+.gr-action-review {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+.gr-action-review input {
+  flex: 0 0 18px;
+  width: 18px;
+  height: 18px;
+  margin: 3px 0 0;
+}
+.gr-action-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+.gr-action-correction .gr-action-buttons button {
+  margin: 0;
+}
 
 .gr-current-claim-label {
   position: absolute;

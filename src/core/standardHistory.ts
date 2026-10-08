@@ -1,5 +1,6 @@
 import {
   eventLabel,
+  activeEvents,
   timeLabel,
   type ClaimPayload,
   type GameTime,
@@ -79,6 +80,145 @@ export type CorrectableFactPayload = Extract<
   EventPayload,
   { kind: "death" | "execution" }
 >;
+
+export type CorrectableActionPayload = Extract<
+  EventPayload,
+  { kind: "nomination" | "slayer" }
+>;
+
+/** Visible ballots requiring explicit review when their nomination is corrected. */
+export function nominationVoteSources(
+  workspace: StandardWorkspace,
+  nominationId: string,
+) {
+  return visibleAtBranch(workspace).filter(
+    (
+      event,
+    ): event is StandardEvent & {
+      payload: Extract<EventPayload, { kind: "vote" }>;
+    } =>
+      event.payload.kind === "vote" &&
+      event.payload.nominationId === nominationId,
+  );
+}
+
+/** Correct an action in its original slot, with reviewed ballots following its nomination. */
+export function correctStandardAction(
+  workspace: StandardWorkspace,
+  eventId: string,
+  payload: CorrectableActionPayload,
+  confirmedVoteIds: readonly string[] = [],
+): StandardWorkspace {
+  requireLatestRevision(workspace);
+  const source = visibleAtBranch(workspace).find(
+    (event) => event.id === eventId,
+  );
+  if (
+    !source ||
+    source.occurredAt?.phase !== "day" ||
+    (source.payload.kind !== "nomination" && source.payload.kind !== "slayer")
+  )
+    throw new Error("待纠正的提名或猎手行动已撤回或在当前视角下不可见。");
+  if (payload.kind !== source.payload.kind)
+    throw new Error("纠正必须保持原记录类型。");
+  const seats =
+    payload.kind === "nomination"
+      ? [payload.nominator, payload.nominee]
+      : [payload.actor, payload.target];
+  if (
+    seats.some(
+      (seat) =>
+        !Number.isInteger(seat) || seat < 1 || seat > workspace.playerCount,
+    )
+  )
+    throw new Error("纠正的玩家座位无效。");
+  if (
+    (payload.kind === "nomination" &&
+      source.payload.kind === "nomination" &&
+      payload.nominator === source.payload.nominator &&
+      payload.nominee === source.payload.nominee) ||
+    (payload.kind === "slayer" &&
+      source.payload.kind === "slayer" &&
+      payload.actor === source.payload.actor &&
+      payload.target === source.payload.target)
+  )
+    return workspace;
+
+  const ballots =
+    payload.kind === "nomination"
+      ? nominationVoteSources(workspace, source.id)
+      : [];
+  const allBallots = activeEvents(workspace.events).filter(
+    (event) =>
+      event.payload.kind === "vote" && event.payload.nominationId === source.id,
+  );
+  if (payload.kind === "nomination" && allBallots.length !== ballots.length)
+    throw new Error("该提名有关联记录在当前视角下不可见，不能在此视角纠正。");
+  if (
+    new Set(confirmedVoteIds).size !== confirmedVoteIds.length ||
+    confirmedVoteIds.length !== ballots.length ||
+    ballots.some((vote) => !confirmedVoteIds.includes(vote.id))
+  )
+    throw new Error(
+      "请先核对并确认全部关联投票；举手名单会保留，投票将重新关联到纠正后的提名。",
+    );
+
+  let next = workspace;
+  for (const vote of ballots)
+    next = retractStandardEvent(
+      next,
+      vote.id,
+      "提名纠正：保留原投票位置和名单，重新关联已核对的提名。",
+    );
+  next = retractStandardEvent(
+    next,
+    source.id,
+    "行动纠正：保留原记录和发生位置，请重新核对本日完整性。",
+  );
+  const noun = payload.kind === "nomination" ? "提名" : "猎手行动";
+  const label = `${noun}纠正：${eventLabel({ payload })} · ${timeLabel(source.occurredAt)}`;
+  next = commitStandardDrafts(
+    next,
+    label,
+    [
+      {
+        payload: { ...payload },
+        occurredAt: source.occurredAt,
+        correctsEventId: source.id,
+        label,
+        sourceSpan: [0, label.length],
+      },
+    ],
+    source.visibility,
+  );
+  const nominationId = next.events.at(-1)!.id;
+  if (payload.kind === "nomination") {
+    for (const vote of ballots) {
+      const ballot = {
+        ...vote.payload,
+        nominee: payload.nominee,
+        nominationId,
+        voters: [...vote.payload.voters],
+      };
+      const voteLabel = `提名纠正时重新关联投票：${eventLabel({ payload: ballot })} · ${timeLabel(vote.occurredAt)}`;
+      next = commitStandardDrafts(
+        next,
+        voteLabel,
+        [
+          {
+            payload: ballot,
+            occurredAt: vote.occurredAt,
+            correctsEventId: vote.id,
+            label: voteLabel,
+            sourceSpan: [0, voteLabel.length],
+          },
+        ],
+        vote.visibility,
+      );
+    }
+  }
+  return next;
+}
 
 /** Preserve the source, phase, visibility and original replay position of a corrected fact. */
 export function correctStandardFact(

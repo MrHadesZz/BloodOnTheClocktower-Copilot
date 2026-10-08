@@ -19,6 +19,7 @@ import {
 import { MAX_GRIMOIRE_DAY } from "./GrimoireEntry";
 import { FactHistoryPanel } from "./FactHistoryPanel";
 import { FactCorrectionForm } from "./FactCorrectionForm";
+import { ActionCorrectionForm } from "./ActionCorrectionForm";
 
 export function GrimoireRecords({
   workspace,
@@ -45,6 +46,7 @@ export function GrimoireRecords({
     useState<StandardWorkspace>();
   const [error, setError] = useState("");
   const [editingFact, setEditingFact] = useState<string>();
+  const [editingAction, setEditingAction] = useState<string>();
   useEffect(() => {
     if (!focusEventId) return;
     const source = document.getElementById(`gr-history-${focusEventId}`);
@@ -109,7 +111,9 @@ export function GrimoireRecords({
             {correction &&
               (ballotCorrection
                 ? " · 投票纠正（原投票位置）"
-                : " · 事实纠正（原发生位置）")}
+                : payload.kind === "nomination" || payload.kind === "slayer"
+                  ? " · 行动纠正（原发生位置）"
+                  : " · 事实纠正（原发生位置）")}
             {payload.kind === "claim" &&
               payload.claimKind === "role" &&
               ` · ${payload.identityStage === "current" ? "本阶段结束时角色" : "开局身份声称"}`}
@@ -164,11 +168,27 @@ export function GrimoireRecords({
                   aria-label={`纠正${eventLabel(event)}`}
                   onClick={() => {
                     setEditingFact(event.id);
+                    setEditingAction(undefined);
                     setEditingVote(undefined);
                     setError("");
                   }}
                 >
                   纠正{payload.kind === "death" ? "死亡" : "处决"}
+                </button>
+              )}
+            {status === "active" &&
+              (payload.kind === "nomination" || payload.kind === "slayer") && (
+                <button
+                  disabled={behind}
+                  aria-label={`纠正${eventLabel(event)}`}
+                  onClick={() => {
+                    setEditingAction(event.id);
+                    setEditingFact(undefined);
+                    setEditingVote(undefined);
+                    setError("");
+                  }}
+                >
+                  纠正{payload.kind === "nomination" ? "提名" : "猎手行动"}
                 </button>
               )}
             {status === "active" && payload.kind === "vote" && (
@@ -177,6 +197,7 @@ export function GrimoireRecords({
                 aria-label={`纠正${eventLabel(event)}`}
                 onClick={() => {
                   setEditingFact(undefined);
+                  setEditingAction(undefined);
                   setEditingVote({
                     eventId: event.id,
                     workspace,
@@ -207,6 +228,16 @@ export function GrimoireRecords({
               </>
             )}
           </div>
+          {editingAction === event.id &&
+            status === "active" &&
+            (payload.kind === "nomination" || payload.kind === "slayer") && (
+              <ActionCorrectionForm
+                workspace={workspace}
+                event={{ ...event, payload }}
+                onChange={onChange}
+                onClose={() => setEditingAction(undefined)}
+              />
+            )}
           {editingFact === event.id &&
             status === "active" &&
             (payload.kind === "death" || payload.kind === "execution") && (

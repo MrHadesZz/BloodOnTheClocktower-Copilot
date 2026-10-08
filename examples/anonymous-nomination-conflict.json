@@ -1,0 +1,300 @@
+{
+  "schemaVersion": 2,
+  "profile": "standard",
+  "gameId": "95aef50d-bd43-47e2-9016-7f1b5aec9c5c",
+  "title": "教学示例 · 提名与投票关联纠正",
+  "playerCount": 7,
+  "perspectiveSeat": 1,
+  "selectedSeat": 1,
+  "query": {
+    "seat": 1,
+    "role": "Imp",
+    "stage": "initial"
+  },
+  "events": [
+    {
+      "id": "7d421bb5-be8b-4bec-a85d-8681075e8c58",
+      "rawEntryId": "8426d07a-6d91-4999-913a-1d6ebbe2534a",
+      "revision": 1,
+      "recordedAt": "2026-10-08T08:01:00.957Z",
+      "occurredAt": {
+        "phase": "night",
+        "cycle": 1
+      },
+      "rawText": "N1本阶段记录完整",
+      "sourceSpan": [
+        0,
+        9
+      ],
+      "payload": {
+        "kind": "phase_closed",
+        "channel": "deaths"
+      },
+      "visibility": "private",
+      "ownerSeat": 1
+    },
+    {
+      "id": "72068a47-7d32-434a-b294-5bc37673081f",
+      "rawEntryId": "6ff17e34-0d2c-4a22-a534-d8411cecd763",
+      "revision": 2,
+      "recordedAt": "2026-10-08T08:01:00.959Z",
+      "occurredAt": {
+        "phase": "day",
+        "cycle": 1
+      },
+      "rawText": "2 nom 3 @D1",
+      "sourceSpan": [
+        0,
+        11
+      ],
+      "payload": {
+        "kind": "nomination",
+        "nominator": 2,
+        "nominee": 3
+      },
+      "visibility": "public"
+    },
+    {
+      "id": "d7e00596-5b00-43f8-8dd0-9a26f7d96dfe",
+      "rawEntryId": "3f2c7d52-2219-4760-b00c-13bb42c0f6fc",
+      "revision": 3,
+      "recordedAt": "2026-10-08T08:01:00.961Z",
+      "occurredAt": {
+        "phase": "day",
+        "cycle": 1
+      },
+      "rawText": "vote 3 = 1,2,3,4 @D1",
+      "sourceSpan": [
+        0,
+        20
+      ],
+      "payload": {
+        "kind": "vote",
+        "nominee": 3,
+        "voters": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "nominationId": "72068a47-7d32-434a-b294-5bc37673081f"
+      },
+      "visibility": "public"
+    },
+    {
+      "id": "9e3c8d4a-38b7-4ca4-9c63-9ac3cfb86b50",
+      "rawEntryId": "a921d108-e9ea-40a9-b93f-58b81f842a8e",
+      "revision": 4,
+      "recordedAt": "2026-10-08T08:01:00.961Z",
+      "occurredAt": {
+        "phase": "day",
+        "cycle": 1
+      },
+      "rawText": "1 slay 5 @D1",
+      "sourceSpan": [
+        0,
+        12
+      ],
+      "payload": {
+        "kind": "slayer",
+        "actor": 1,
+        "target": 5
+      },
+      "visibility": "public"
+    },
+    {
+      "id": "fc1718e1-ff10-456b-9051-7888005c138d",
+      "rawEntryId": "f9bd6309-30c2-41ec-889f-61b09b5c735b",
+      "revision": 5,
+      "recordedAt": "2026-10-08T08:01:00.961Z",
+      "occurredAt": {
+        "phase": "day",
+        "cycle": 1
+      },
+      "rawText": "exec 4 @D1",
+      "sourceSpan": [
+        0,
+        10
+      ],
+      "payload": {
+        "kind": "execution",
+        "seat": 4
+      },
+      "visibility": "public"
+    },
+    {
+      "id": "f8300f70-6b35-4058-8606-ebd9bdb60505",
+      "rawEntryId": "cc6d8f73-5958-4bce-8077-aa9be25782db",
+      "revision": 6,
+      "recordedAt": "2026-10-08T08:01:00.961Z",
+      "occurredAt": {
+        "phase": "day",
+        "cycle": 1
+      },
+      "rawText": "4 dead @D1",
+      "sourceSpan": [
+        0,
+        10
+      ],
+      "payload": {
+        "kind": "death",
+        "seat": 4
+      },
+      "visibility": "public"
+    },
+    {
+      "id": "a7ef4686-a3e6-438b-9065-0d532540b66c",
+      "rawEntryId": "9919a2b2-51be-4287-8469-3e1d8b2713ea",
+      "revision": 7,
+      "recordedAt": "2026-10-08T08:01:00.961Z",
+      "occurredAt": {
+        "phase": "day",
+        "cycle": 1
+      },
+      "rawText": "D1本阶段记录完整",
+      "sourceSpan": [
+        0,
+        9
+      ],
+      "payload": {
+        "kind": "phase_closed",
+        "channel": "actions"
+      },
+      "visibility": "private",
+      "ownerSeat": 1
+    },
+    {
+      "id": "50b077b8-f606-4d06-89aa-21ba4fa8b204",
+      "rawEntryId": "9919a2b2-51be-4287-8469-3e1d8b2713ea",
+      "revision": 8,
+      "recordedAt": "2026-10-08T08:01:00.961Z",
+      "occurredAt": {
+        "phase": "day",
+        "cycle": 1
+      },
+      "rawText": "D1本阶段记录完整",
+      "sourceSpan": [
+        0,
+        9
+      ],
+      "payload": {
+        "kind": "phase_closed",
+        "channel": "deaths"
+      },
+      "visibility": "private",
+      "ownerSeat": 1
+    },
+    {
+      "id": "7d72d1ae-49cb-4dcb-b991-b0a585a2ad01",
+      "rawEntryId": "2af7f5af-2b81-4a45-b2b0-8efec120c422",
+      "revision": 9,
+      "recordedAt": "2026-10-08T08:01:00.962Z",
+      "occurredAt": {
+        "phase": "night",
+        "cycle": 1
+      },
+      "rawText": "匿名教学：1号声称猎手",
+      "sourceSpan": [
+        0,
+        11
+      ],
+      "payload": {
+        "kind": "claim",
+        "claimKind": "role",
+        "speaker": 1,
+        "role": "Slayer"
+      },
+      "visibility": "private",
+      "ownerSeat": 1
+    }
+  ],
+  "hypotheses": [
+    {
+      "kind": "actual_role",
+      "seat": 1,
+      "role": "Slayer",
+      "id": "7496133f-37a2-48e4-84d4-ed5f128240fc",
+      "createdAt": "2026-10-08T08:01:00.956Z"
+    },
+    {
+      "kind": "actual_role",
+      "seat": 2,
+      "role": "Chef",
+      "id": "69ce4bd9-dd24-411a-9535-b42604dc015a",
+      "createdAt": "2026-10-08T08:01:00.956Z"
+    },
+    {
+      "kind": "actual_role",
+      "seat": 3,
+      "role": "Monk",
+      "id": "951e5a3c-785b-457c-975c-325f3b50ef26",
+      "createdAt": "2026-10-08T08:01:00.956Z"
+    },
+    {
+      "kind": "actual_role",
+      "seat": 4,
+      "role": "Fortune Teller",
+      "id": "5e82efcb-a378-4b13-8977-326c0262171e",
+      "createdAt": "2026-10-08T08:01:00.956Z"
+    },
+    {
+      "kind": "actual_role",
+      "seat": 5,
+      "role": "Soldier",
+      "id": "a7d775b6-59d1-4a43-97c8-596096458170",
+      "createdAt": "2026-10-08T08:01:00.956Z"
+    },
+    {
+      "kind": "actual_role",
+      "seat": 6,
+      "role": "Poisoner",
+      "id": "c6ebf38c-f613-46aa-bfe1-5ab46a2ce1f0",
+      "createdAt": "2026-10-08T08:01:00.957Z"
+    },
+    {
+      "kind": "actual_role",
+      "seat": 7,
+      "role": "Imp",
+      "id": "b94d515c-758d-438e-ae98-d20e81473c14",
+      "createdAt": "2026-10-08T08:01:00.957Z"
+    }
+  ],
+  "branches": [
+    {
+      "id": "e1b4f45c-06ad-4b28-9fee-d1e4caff91f5",
+      "name": "基础记录",
+      "baseRevision": 9,
+      "assumptionIds": [
+        "7496133f-37a2-48e4-84d4-ed5f128240fc",
+        "69ce4bd9-dd24-411a-9535-b42604dc015a",
+        "951e5a3c-785b-457c-975c-325f3b50ef26",
+        "5e82efcb-a378-4b13-8977-326c0262171e",
+        "a7d775b6-59d1-4a43-97c8-596096458170",
+        "c6ebf38c-f613-46aa-bfe1-5ab46a2ce1f0",
+        "b94d515c-758d-438e-ae98-d20e81473c14"
+      ],
+      "createdAt": "2026-10-08T08:01:00.956Z"
+    },
+    {
+      "id": "12ef339e-6c3d-4d25-bfcd-f6ced162f17e",
+      "name": "提名纠正示例",
+      "parentId": "e1b4f45c-06ad-4b28-9fee-d1e4caff91f5",
+      "baseRevision": 9,
+      "assumptionIds": [
+        "7496133f-37a2-48e4-84d4-ed5f128240fc",
+        "69ce4bd9-dd24-411a-9535-b42604dc015a",
+        "951e5a3c-785b-457c-975c-325f3b50ef26",
+        "5e82efcb-a378-4b13-8977-326c0262171e",
+        "a7d775b6-59d1-4a43-97c8-596096458170",
+        "c6ebf38c-f613-46aa-bfe1-5ab46a2ce1f0",
+        "b94d515c-758d-438e-ae98-d20e81473c14"
+      ],
+      "createdAt": "2026-10-08T08:01:00.962Z"
+    }
+  ],
+  "activeBranchId": "12ef339e-6c3d-4d25-bfcd-f6ced162f17e",
+  "recordingTime": {
+    "phase": "day",
+    "cycle": 1
+  }
+}

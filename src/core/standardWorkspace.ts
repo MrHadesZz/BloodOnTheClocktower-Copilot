@@ -79,7 +79,7 @@ export interface StandardBranch {
 }
 
 export interface StandardWorkspace {
-  schemaVersion: 2 | 3 | 4;
+  schemaVersion: 2 | 3 | 4 | 5;
   profile: "standard";
   gameId: string;
   title: string;
@@ -95,7 +95,7 @@ export interface StandardWorkspace {
 }
 
 export interface PublicTranscript {
-  schemaVersion: 1 | 2 | 3;
+  schemaVersion: 1 | 2 | 3 | 4;
   kind: "clocktower-public-transcript";
   gameId: string;
   title: string;
@@ -207,6 +207,8 @@ export function commitStandardDrafts(
       const nominations = current.filter(
         (event) =>
           event.payload.kind === "nomination" &&
+          (payload.nominationId === undefined ||
+            event.id === payload.nominationId) &&
           event.payload.nominee === payload.nominee &&
           event.occurredAt?.phase === draft.occurredAt?.phase &&
           event.occurredAt?.cycle === draft.occurredAt?.cycle,
@@ -241,15 +243,24 @@ export function commitStandardDrafts(
   const next: StandardWorkspace = {
     ...workspace,
     schemaVersion:
-      workspace.schemaVersion === 4 ||
+      workspace.schemaVersion === 5 ||
       drafts.some(
         (draft) =>
-          draft.correctsEventId !== undefined && draft.payload.kind !== "vote",
+          draft.correctsEventId !== undefined &&
+          (draft.payload.kind === "nomination" ||
+            draft.payload.kind === "slayer"),
       )
-        ? 4
-        : drafts.some((draft) => draft.correctsEventId !== undefined)
-          ? 3
-          : workspace.schemaVersion,
+        ? 5
+        : workspace.schemaVersion === 4 ||
+            drafts.some(
+              (draft) =>
+                draft.correctsEventId !== undefined &&
+                draft.payload.kind !== "vote",
+            )
+          ? 4
+          : drafts.some((draft) => draft.correctsEventId !== undefined)
+            ? 3
+            : workspace.schemaVersion,
     events: [...workspace.events, ...events],
     branches: workspace.branches.map((branch) =>
       branch.id === workspace.activeBranchId
@@ -416,12 +427,20 @@ export function publicTranscript(
   return {
     schemaVersion: events.some(
       (event) =>
-        event.correctsEventId !== undefined && event.payload.kind !== "vote",
+        event.correctsEventId !== undefined &&
+        (event.payload.kind === "nomination" ||
+          event.payload.kind === "slayer"),
     )
-      ? 3
-      : events.some((event) => event.correctsEventId !== undefined)
-        ? 2
-        : 1,
+      ? 4
+      : events.some(
+            (event) =>
+              event.correctsEventId !== undefined &&
+              event.payload.kind !== "vote",
+          )
+        ? 3
+        : events.some((event) => event.correctsEventId !== undefined)
+          ? 2
+          : 1,
     kind: "clocktower-public-transcript",
     gameId: workspace.gameId,
     title: workspace.title,
@@ -980,7 +999,8 @@ export function validateStandardWorkspace(value: unknown): StandardWorkspace {
     !isRecord(value) ||
     (value.schemaVersion !== 2 &&
       value.schemaVersion !== 3 &&
-      value.schemaVersion !== 4) ||
+      value.schemaVersion !== 4 &&
+      value.schemaVersion !== 5) ||
     value.profile !== "standard"
   )
     throw new Error("不是标准对局工作区导出数据。");
@@ -1215,18 +1235,50 @@ export function validateStandardWorkspace(value: unknown): StandardWorkspace {
         : undefined;
       const ballot = payload.kind === "vote";
       const fact = payload.kind === "death" || payload.kind === "execution";
+      const action = payload.kind === "nomination" || payload.kind === "slayer";
+      const nomination =
+        ballot && nonempty(payload.nominationId)
+          ? eventsById.get(payload.nominationId)
+          : undefined;
+      const previousBallot =
+        previous && isRecord(previous.payload) ? previous.payload : undefined;
+      const correctedVoters = payload.voters;
+      // Only the direct audited replacement of the original nomination can
+      // rebind a ballot. Relinking preserves its voters; edits use vote correction.
+      const reboundBallot =
+        value.schemaVersion === 5 &&
+        ballot &&
+        previousBallot?.kind === "vote" &&
+        nomination?.correctsEventId === previousBallot.nominationId &&
+        Array.isArray(previousBallot.voters) &&
+        Array.isArray(correctedVoters) &&
+        previousBallot.voters.length === correctedVoters.length &&
+        previousBallot.voters.every((seat: unknown) =>
+          correctedVoters.includes(seat),
+        );
       if (
         !(ballot
-          ? value.schemaVersion === 3 || value.schemaVersion === 4
-          : fact && value.schemaVersion === 4) ||
+          ? value.schemaVersion >= 3
+          : fact
+            ? value.schemaVersion >= 4
+            : action && value.schemaVersion === 5) ||
         !previous ||
         !isRecord(previous.payload) ||
         previous.payload.kind !== payload.kind ||
         !retracted.has(raw.correctsEventId as string) ||
         (ballot &&
-          (previous.payload.nominee !== payload.nominee ||
-            previous.payload.nominationId !== payload.nominationId ||
+          ((!reboundBallot &&
+            (previous.payload.nominee !== payload.nominee ||
+              previous.payload.nominationId !== payload.nominationId)) ||
             retracted.has(payload.nominationId as string))) ||
+        (payload.kind === "nomination" &&
+          [...eventsById.values()].some(
+            (event) =>
+              !retracted.has(event.id as string) &&
+              isRecord(event.payload) &&
+              event.payload.kind === "vote" &&
+              event.payload.nominationId === raw.correctsEventId,
+          )) ||
         !validTime(previous.occurredAt) ||
         !validTime(raw.occurredAt) ||
         previous.occurredAt.phase !== raw.occurredAt.phase ||
