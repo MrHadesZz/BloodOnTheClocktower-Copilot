@@ -1044,3 +1044,7 @@
   overflow-wrap: anywhere;
   margin: 8px 0;
 }
+.gr-history-row:focus {
+  outline: 2px solid #907040;
+  outline-offset: 3px;
+}

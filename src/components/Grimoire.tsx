@@ -104,13 +104,20 @@ export function Grimoire({
     kind: "correction" | "changed_claim";
   }>();
   const [category, setCategory] = useState<Team | "all">("all");
+  const [reviewedSource, setReviewedSource] = useState<{
+    gameId: string;
+    branchId: string;
+    revision: number;
+    eventId: string;
+  }>();
   useEffect(() => {
     if (!dialog.current?.open) return;
+    if (panel === "records" && reviewedSource) return;
     dialog.current.scrollTop = 0;
     dialog.current
       .querySelector<HTMLElement>("#gr-dialog-title")
       ?.focus({ preventScroll: true });
-  }, [panel]);
+  }, [panel, reviewedSource]);
   const [count, setCount] = useState(workspace.playerCount);
   const [perspective, setPerspective] = useState(workspace.perspectiveSeat);
   const [message, setMessage] = useState("");
@@ -168,6 +175,7 @@ export function Grimoire({
     visible.filter((e) => e.payload.kind === "death" && e.payload.seat === s);
   const close = () => dialog.current?.close();
   const open = (next: typeof panel, s = seat) => {
+    setReviewedSource(undefined);
     setSeat(s);
     setPanel(next);
     setSearch("");
@@ -177,6 +185,22 @@ export function Grimoire({
     setEditing(undefined);
     setError("");
     dialog.current?.showModal();
+  };
+  const reviewSource = (eventId: string) => {
+    const event = visible.find((record) => record.id === eventId);
+    if (!event?.occurredAt) return;
+    const branch = workspace.branches.find(
+      (b) => b.id === workspace.activeBranchId,
+    )!;
+    if (event.occurredAt.cycle <= MAX_GRIMOIRE_DAY)
+      selectTime(event.occurredAt);
+    open("records");
+    setReviewedSource({
+      gameId: workspace.gameId,
+      branchId: branch.id,
+      revision: branch.baseRevision,
+      eventId,
+    });
   };
   const mutate = (
     fn: () => StandardWorkspace,
@@ -650,6 +674,17 @@ export function Grimoire({
                   open("action");
                 }}
                 onAmend={amend}
+                onReviewSource={reviewSource}
+                focusEventId={
+                  reviewedSource?.gameId === workspace.gameId &&
+                  reviewedSource.branchId === workspace.activeBranchId &&
+                  reviewedSource.revision ===
+                    workspace.branches.find(
+                      (b) => b.id === workspace.activeBranchId,
+                    )!.baseRevision
+                    ? reviewedSource.eventId
+                    : undefined
+                }
               />,
             )}
           {(panel === "report" || panel === "action") &&
@@ -674,13 +709,20 @@ export function Grimoire({
             frame(
               "魔典条件推理",
               "记录、采纳前提、查询与依据在同一魔典中完成。",
-              <GrimoireReasoning workspace={workspace} onChange={onChange} />,
+              <GrimoireReasoning
+                workspace={workspace}
+                onChange={onChange}
+                onReviewSource={reviewSource}
+              />,
             )}
           {panel === "analysis" &&
             frame(
               "声称与信息分析",
               "检查冲突，寻找需要复核的玩家。",
-              <ClaimAnalysisPanel workspace={workspace} />,
+              <ClaimAnalysisPanel
+                workspace={workspace}
+                onReviewSource={reviewSource}
+              />,
             )}
           {panel === "new" &&
             frame(

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Undo2 } from "lucide-react";
 import { eventLabel, timeLabel, type GameTime } from "../core/model";
 import {
@@ -18,6 +18,7 @@ import {
 } from "../core/standardWorkspace";
 import { MAX_GRIMOIRE_DAY } from "./GrimoireEntry";
 import { FactHistoryPanel } from "./FactHistoryPanel";
+import { FactCorrectionForm } from "./FactCorrectionForm";
 
 export function GrimoireRecords({
   workspace,
@@ -26,6 +27,8 @@ export function GrimoireRecords({
   onAdd,
   onTime,
   onAmend,
+  focusEventId,
+  onReviewSource,
 }: {
   workspace: StandardWorkspace;
   time: GameTime;
@@ -33,12 +36,21 @@ export function GrimoireRecords({
   onAdd: (time: GameTime) => void;
   onTime: (time: GameTime) => void;
   onAmend: (event: StandardEvent, kind: "correction" | "changed_claim") => void;
+  focusEventId?: string;
+  onReviewSource?: (id: string) => void;
 }) {
   const [confirming, setConfirming] = useState<string>();
   const [confirmed, setConfirmed] = useState(false);
   const [confirmationWorkspace, setConfirmationWorkspace] =
     useState<StandardWorkspace>();
   const [error, setError] = useState("");
+  const [editingFact, setEditingFact] = useState<string>();
+  useEffect(() => {
+    if (!focusEventId) return;
+    const source = document.getElementById(`gr-history-${focusEventId}`);
+    source?.focus({ preventScroll: true });
+    source?.scrollIntoView({ block: "center" });
+  }, [focusEventId]);
   const [editingVote, setEditingVote] = useState<{
     eventId: string;
     workspace: StandardWorkspace;
@@ -68,6 +80,8 @@ export function GrimoireRecords({
     const { event, status } = row;
     const payload = event.payload;
     const change = payload.kind === "claim" ? payload.change : undefined;
+    const correction = event.correctsEventId !== undefined;
+    const ballotCorrection = correction && payload.kind === "vote";
     const previousId = change?.previousId ?? event.correctsEventId;
     const previous = previousId
       ? workspace.events.find(
@@ -78,7 +92,12 @@ export function GrimoireRecords({
         )
       : undefined;
     return (
-      <article className={`gr-history-row gr-history-${status}`} key={event.id}>
+      <article
+        className={`gr-history-row gr-history-${status}`}
+        key={event.id}
+        id={`gr-history-${event.id}`}
+        tabIndex={-1}
+      >
         <div>
           <small>
             {event.visibility === "private" ? "私密" : "公开"} · 修订
@@ -87,7 +106,10 @@ export function GrimoireRecords({
               ` · ${status === "superseded" ? "改口前/历史声称" : status === "corrected" ? "已纠正的原记录" : "已撤销"}`}
             {change &&
               ` · ${change.kind === "correction" ? "录入纠正" : "玩家改口"}`}
-            {event.correctsEventId && " · 投票纠正（原投票位置）"}
+            {correction &&
+              (ballotCorrection
+                ? " · 投票纠正（原投票位置）"
+                : " · 事实纠正（原发生位置）")}
             {payload.kind === "claim" &&
               payload.claimKind === "role" &&
               ` · ${payload.identityStage === "current" ? "本阶段结束时角色" : "开局身份声称"}`}
@@ -96,14 +118,18 @@ export function GrimoireRecords({
           {previous && (
             <p className="gr-history-link">
               {event.correctsEventId
-                ? "原投票"
+                ? ballotCorrection
+                  ? "原投票"
+                  : "原记录"
                 : change!.kind === "correction"
                   ? "原记录"
                   : "改口前"}
               ：{eventLabel(previous)} · {timeLabel(previous.occurredAt)} →
               本条记录；
               {event.correctsEventId
-                ? `按原投票发生位置重放；${event.occurredAt && standardPhaseStatus(workspace, event.occurredAt).complete ? "本日已重新确认完整。" : "请重新确认本日记录完整。"}`
+                ? ballotCorrection
+                  ? `按原投票发生位置重放；${event.occurredAt && standardPhaseStatus(workspace, event.occurredAt).complete ? "本日已重新确认完整。" : "请重新确认本日记录完整。"}`
+                  : `按原发生位置重放；${event.occurredAt && standardPhaseStatus(workspace, event.occurredAt).complete ? "本阶段已重新确认完整。" : "请重新确认本阶段记录完整。"}`
                 : `${timeLabel(change!.announcedAt)}记录本次变化。`}
             </p>
           )}
@@ -120,12 +146,37 @@ export function GrimoireRecords({
               </p>
             </details>
           )}
+          {correction && !ballotCorrection && previous && (
+            <details className="gr-history-link">
+              <summary>回看纠正前原记录</summary>
+              <p>
+                {eventLabel(previous)} · {timeLabel(previous.occurredAt)} · 修订
+                {previous.revision}
+              </p>
+              <blockquote>{previous.rawText}</blockquote>
+            </details>
+          )}
           <div className="gr-history-actions">
+            {status === "active" &&
+              (payload.kind === "death" || payload.kind === "execution") && (
+                <button
+                  disabled={behind}
+                  aria-label={`纠正${eventLabel(event)}`}
+                  onClick={() => {
+                    setEditingFact(event.id);
+                    setEditingVote(undefined);
+                    setError("");
+                  }}
+                >
+                  纠正{payload.kind === "death" ? "死亡" : "处决"}
+                </button>
+              )}
             {status === "active" && payload.kind === "vote" && (
               <button
                 disabled={behind}
                 aria-label={`纠正${eventLabel(event)}`}
                 onClick={() => {
+                  setEditingFact(undefined);
                   setEditingVote({
                     eventId: event.id,
                     workspace,
@@ -156,6 +207,16 @@ export function GrimoireRecords({
               </>
             )}
           </div>
+          {editingFact === event.id &&
+            status === "active" &&
+            (payload.kind === "death" || payload.kind === "execution") && (
+              <FactCorrectionForm
+                workspace={workspace}
+                event={{ ...event, payload }}
+                onChange={onChange}
+                onClose={() => setEditingFact(undefined)}
+              />
+            )}
           {editingVote?.eventId === event.id &&
             status === "active" &&
             payload.kind === "vote" && (
@@ -298,7 +359,10 @@ export function GrimoireRecords({
       )}
       <details className="gr-fact-entry">
         <summary>核对固定事实与阶段冲突</summary>
-        <FactHistoryPanel workspace={workspace} />
+        <FactHistoryPanel
+          workspace={workspace}
+          onReviewSource={onReviewSource}
+        />
       </details>
       {[...indexes]
         .sort((a, b) => a - b)

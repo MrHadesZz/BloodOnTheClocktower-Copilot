@@ -79,7 +79,7 @@ export interface StandardBranch {
 }
 
 export interface StandardWorkspace {
-  schemaVersion: 2 | 3;
+  schemaVersion: 2 | 3 | 4;
   profile: "standard";
   gameId: string;
   title: string;
@@ -95,7 +95,7 @@ export interface StandardWorkspace {
 }
 
 export interface PublicTranscript {
-  schemaVersion: 1 | 2;
+  schemaVersion: 1 | 2 | 3;
   kind: "clocktower-public-transcript";
   gameId: string;
   title: string;
@@ -240,9 +240,16 @@ export function commitStandardDrafts(
   const revision = workspace.events.length + events.length;
   const next: StandardWorkspace = {
     ...workspace,
-    schemaVersion: drafts.some((draft) => draft.correctsEventId !== undefined)
-      ? 3
-      : workspace.schemaVersion,
+    schemaVersion:
+      workspace.schemaVersion === 4 ||
+      drafts.some(
+        (draft) =>
+          draft.correctsEventId !== undefined && draft.payload.kind !== "vote",
+      )
+        ? 4
+        : drafts.some((draft) => draft.correctsEventId !== undefined)
+          ? 3
+          : workspace.schemaVersion,
     events: [...workspace.events, ...events],
     branches: workspace.branches.map((branch) =>
       branch.id === workspace.activeBranchId
@@ -407,9 +414,14 @@ export function publicTranscript(
     )
     .map((event) => ({ ...event, rawEntryId: `public-${event.id}` }));
   return {
-    schemaVersion: events.some((event) => event.correctsEventId !== undefined)
-      ? 2
-      : 1,
+    schemaVersion: events.some(
+      (event) =>
+        event.correctsEventId !== undefined && event.payload.kind !== "vote",
+    )
+      ? 3
+      : events.some((event) => event.correctsEventId !== undefined)
+        ? 2
+        : 1,
     kind: "clocktower-public-transcript",
     gameId: workspace.gameId,
     title: workspace.title,
@@ -659,7 +671,7 @@ export function prepareStandardObservedQuery(
     while (original.correctsEventId !== undefined) {
       const previous = historical.get(original.correctsEventId);
       if (!previous || previous.revision >= original.revision)
-        throw new Error("投票纠正的原记录或顺序无效。");
+        throw new Error("纠正记录的原记录或顺序无效。");
       original = previous;
     }
     return original.revision;
@@ -966,7 +978,9 @@ export function prepareStandardObservedQuery(
 export function validateStandardWorkspace(value: unknown): StandardWorkspace {
   if (
     !isRecord(value) ||
-    (value.schemaVersion !== 2 && value.schemaVersion !== 3) ||
+    (value.schemaVersion !== 2 &&
+      value.schemaVersion !== 3 &&
+      value.schemaVersion !== 4) ||
     value.profile !== "standard"
   )
     throw new Error("不是标准对局工作区导出数据。");
@@ -1199,16 +1213,20 @@ export function validateStandardWorkspace(value: unknown): StandardWorkspace {
       const previous = nonempty(raw.correctsEventId)
         ? eventsById.get(raw.correctsEventId)
         : undefined;
+      const ballot = payload.kind === "vote";
+      const fact = payload.kind === "death" || payload.kind === "execution";
       if (
-        value.schemaVersion !== 3 ||
-        payload.kind !== "vote" ||
+        !(ballot
+          ? value.schemaVersion === 3 || value.schemaVersion === 4
+          : fact && value.schemaVersion === 4) ||
         !previous ||
         !isRecord(previous.payload) ||
-        previous.payload.kind !== "vote" ||
+        previous.payload.kind !== payload.kind ||
         !retracted.has(raw.correctsEventId as string) ||
-        previous.payload.nominee !== payload.nominee ||
-        previous.payload.nominationId !== payload.nominationId ||
-        retracted.has(payload.nominationId as string) ||
+        (ballot &&
+          (previous.payload.nominee !== payload.nominee ||
+            previous.payload.nominationId !== payload.nominationId ||
+            retracted.has(payload.nominationId as string))) ||
         !validTime(previous.occurredAt) ||
         !validTime(raw.occurredAt) ||
         previous.occurredAt.phase !== raw.occurredAt.phase ||
@@ -1221,7 +1239,9 @@ export function validateStandardWorkspace(value: unknown): StandardWorkspace {
             !retracted.has(event.id as string),
         )
       )
-        throw new Error(`第${index + 1}条投票纠正的原记录、阶段或引用无效。`);
+        throw new Error(
+          `第${index + 1}条${ballot ? "投票" : "事实"}纠正的原记录、阶段或引用无效。`,
+        );
     }
     eventsById.set(raw.id, raw);
   }

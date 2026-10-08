@@ -24,9 +24,11 @@ import { solveStandardWorkspace } from "../core/standardQuery";
 export function GrimoireReasoning({
   workspace,
   onChange,
+  onReviewSource,
 }: {
   workspace: StandardWorkspace;
   onChange: (next: StandardWorkspace) => void;
+  onReviewSource?: (id: string) => void;
 }) {
   const branch = workspace.branches.find(
     (b) => b.id === workspace.activeBranchId,
@@ -427,7 +429,11 @@ export function GrimoireReasoning({
             </p>
           )}
           {currentResult.answer.classification === "inconsistent" && (
-            <ConflictPanel workspace={workspace} onTrial={tryWithout} />
+            <ConflictPanel
+              workspace={workspace}
+              onTrial={tryWithout}
+              onReviewSource={onReviewSource}
+            />
           )}
           <details>
             <summary>查看依据与来源</summary>

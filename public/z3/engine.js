@@ -10017,7 +10017,7 @@ var ClocktowerZ3 = (() => {
       while (original.correctsEventId !== void 0) {
         const previous = historical.get(original.correctsEventId);
         if (!previous || previous.revision >= original.revision)
-          throw new Error("\u6295\u7968\u7EA0\u6B63\u7684\u539F\u8BB0\u5F55\u6216\u987A\u5E8F\u65E0\u6548\u3002");
+          throw new Error("\u7EA0\u6B63\u8BB0\u5F55\u7684\u539F\u8BB0\u5F55\u6216\u987A\u5E8F\u65E0\u6548\u3002");
         original = previous;
       }
       return original.revision;

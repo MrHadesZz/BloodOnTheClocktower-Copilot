@@ -13,9 +13,11 @@ import { FactHistoryPanel } from "./FactHistoryPanel";
 export function ConflictPanel({
   workspace,
   onTrial,
+  onReviewSource,
 }: {
   workspace: StandardWorkspace;
   onTrial: (id: string) => void;
+  onReviewSource?: (id: string) => void;
 }) {
   const [analysis, setAnalysis] = useState<{
     workspace: StandardWorkspace;
@@ -172,7 +174,10 @@ export function ConflictPanel({
             </p>
           )}
           {current.status === "fixed_conflict" && (
-            <FactHistoryPanel workspace={workspace} />
+            <FactHistoryPanel
+              workspace={workspace}
+              onReviewSource={onReviewSource}
+            />
           )}
         </>
       )}

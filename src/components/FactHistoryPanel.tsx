@@ -11,8 +11,10 @@ import { hypothesisLabel } from "./hypothesisLabel";
 
 export function FactHistoryPanel({
   workspace,
+  onReviewSource,
 }: {
   workspace: StandardWorkspace;
+  onReviewSource?: (id: string) => void;
 }) {
   const [completed, setCompleted] = useState<{
     workspace: StandardWorkspace;
@@ -196,7 +198,18 @@ export function FactHistoryPanel({
                     </p>
                     <blockquote>{source.rawText}</blockquote>
                     {original && (
-                      <p>纠正前原文：{original.rawText}；保留原投票位置。</p>
+                      <p>
+                        纠正前原文：{original.rawText}；
+                        {source.payload.kind === "vote"
+                          ? "保留原投票位置"
+                          : "保留原发生位置"}
+                        。
+                      </p>
+                    )}
+                    {onReviewSource && (
+                      <button onClick={() => onReviewSource(source.id)}>
+                        在记录中核对{eventLabel(source)}
+                      </button>
                     )}
                   </details>
                 );

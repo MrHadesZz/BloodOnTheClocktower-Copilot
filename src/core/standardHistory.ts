@@ -4,6 +4,7 @@ import {
   type ClaimPayload,
   type GameTime,
   type Role,
+  type EventPayload,
 } from "./model";
 import {
   commitStandardDrafts,
@@ -72,6 +73,58 @@ export function currentStandardClaims(
 
 function requireLatestRevision(w: StandardWorkspace) {
   requireLatestStandardRevision(w);
+}
+
+export type CorrectableFactPayload = Extract<
+  EventPayload,
+  { kind: "death" | "execution" }
+>;
+
+/** Preserve the source, phase, visibility and original replay position of a corrected fact. */
+export function correctStandardFact(
+  workspace: StandardWorkspace,
+  eventId: string,
+  payload: CorrectableFactPayload,
+): StandardWorkspace {
+  requireLatestRevision(workspace);
+  const source = visibleAtBranch(workspace).find(
+    (event) => event.id === eventId,
+  );
+  if (
+    !source ||
+    !source.occurredAt ||
+    (source.payload.kind !== "death" && source.payload.kind !== "execution")
+  )
+    throw new Error("待纠正的死亡或处决记录已撤回或在当前视角下不可见。");
+  if (payload.kind !== source.payload.kind)
+    throw new Error("纠正必须保持原记录类型；处决与死亡请分别核对。");
+  if (
+    !Number.isInteger(payload.seat) ||
+    payload.seat < 1 ||
+    payload.seat > workspace.playerCount
+  )
+    throw new Error("纠正的玩家座位无效。");
+  if (payload.seat === source.payload.seat) return workspace;
+  const next = retractStandardEvent(
+    workspace,
+    source.id,
+    "事实纠正：保留原记录和发生位置，请重新核对本阶段完整性。",
+  );
+  const label = `${payload.kind === "death" ? "死亡" : "处决"}纠正：${eventLabel({ payload })} · ${timeLabel(source.occurredAt)}`;
+  return commitStandardDrafts(
+    next,
+    label,
+    [
+      {
+        payload: { ...payload },
+        occurredAt: source.occurredAt,
+        correctsEventId: source.id,
+        label,
+        sourceSpan: [0, label.length],
+      },
+    ],
+    source.visibility,
+  );
 }
 
 /** Append an audited replacement without moving the original ballot in replay order. */

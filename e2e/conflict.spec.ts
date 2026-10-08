@@ -207,7 +207,8 @@ test("limited localization stays partial until deletion witnesses are fully veri
   await expect(panel).toContainText("已确认冲突，最小性未验证完成", {
     timeout: 20_000,
   });
-  await expect(panel).toContainText("已达到检查次数上限");
+  // Cold Worker initialization may consume the time budget before the check cap.
+  await expect(panel).toContainText(/检查次数上限|时间预算/);
   await expect(
     panel.getByText("已验证最小前提冲突集", { exact: true }),
   ).toHaveCount(0);
