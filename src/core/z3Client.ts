@@ -11,6 +11,7 @@ import type { FactHistoryAnalysis, FactHistoryOptions } from "./factHistory";
 import type { ClaimAnalysis, ClaimAnalysisOptions } from "./claimAnalysis";
 import type { ClaimConditionDiagnosis } from "./claimConditionAnalysis";
 import type { StandardWorkspace } from "./standardWorkspace";
+import type { RecordAnalysis, RecordAnalysisOptions } from "./recordAnalysis";
 
 export interface Z3ProbeResult {
   status: string;
@@ -19,6 +20,12 @@ export interface Z3ProbeResult {
 }
 
 type Request =
+  | {
+      kind: "record_analysis";
+      workspace: StandardWorkspace;
+      sourceId: string;
+      options?: RecordAnalysisOptions;
+    }
   | {
       kind: "fact_history";
       workspace: StandardWorkspace;
@@ -174,6 +181,26 @@ export const queryZ3FactHistory = (
       complete: false,
       status: progress.boundary ? "partial" : "unknown",
       reason: "阶段定位达到时间预算，保留已确认的证据；最早边界尚未验证。",
+    }),
+    onProgress,
+  );
+
+export const queryZ3RecordAnalysis = (
+  workspace: StandardWorkspace,
+  sourceId: string,
+  options: RecordAnalysisOptions = {},
+  signal?: AbortSignal,
+  onProgress?: (progress: RecordAnalysis) => void,
+) =>
+  requestZ3<RecordAnalysis>(
+    { kind: "record_analysis", workspace, sourceId, options },
+    Math.min(Math.max(options.budgetMs ?? 20000, 0), 60000) + 5000,
+    signal,
+    (progress) => ({
+      ...progress,
+      status: progress.baselineConflict ? "partial" : "unknown",
+      complete: false,
+      reason: "试查达到时间预算，保留已验证的候选；未完成部分仍未知。",
     }),
     onProgress,
   );

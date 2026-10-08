@@ -4,15 +4,22 @@ import {
   queryZ3Claims,
   queryZ3ClaimConditions,
   queryZ3FactHistory,
+  queryZ3RecordAnalysis,
 } from "./z3Client";
 import { createStandardWorkspace } from "./standardWorkspace";
 import type { ConflictAnalysis } from "./conflict";
 import type { FactHistoryAnalysis } from "./factHistory";
+import type { RecordAnalysis } from "./recordAnalysis";
 
 class FakeWorker {
   static instances: FakeWorker[] = [];
   requestId = "";
-  request?: { requestId: string; kind?: string; options?: unknown };
+  request?: {
+    requestId: string;
+    kind?: string;
+    sourceId?: string;
+    options?: unknown;
+  };
   onmessage?: (event: { data: unknown }) => void;
   onerror?: (event: { message: string; preventDefault: () => void }) => void;
   terminate = vi.fn();
@@ -22,6 +29,7 @@ class FakeWorker {
   postMessage(request: {
     requestId: string;
     kind?: string;
+    sourceId?: string;
     options?: unknown;
   }) {
     this.request = request;
@@ -215,6 +223,88 @@ describe("history diagnosis worker lifecycle", () => {
     const rejection = expect(pending).rejects.toThrow("结果未知");
     await vi.advanceTimersByTimeAsync(5001);
     await rejection;
+    expect(FakeWorker.instances[0].terminate).toHaveBeenCalledOnce();
+  });
+});
+
+describe("record analysis worker evidence and cancellation", () => {
+  const progress: RecordAnalysis = {
+    status: "partial",
+    sourceId: "death-source",
+    revision: 8,
+    assumptionIds: [],
+    relatedSourceIds: [],
+    baselineConflict: true,
+    checks: 2,
+    testedCandidates: 1,
+    totalCandidates: 6,
+    unknownCandidates: 0,
+    complete: false,
+    alternatives: [
+      {
+        id: "seat-4",
+        label: "死亡玩家：3号 → 4号",
+        payload: { kind: "death", seat: 4 },
+        witness: { roles: [], shownTokens: [], registrations: [] },
+      },
+    ],
+    rulesetHash: "test-v1",
+  };
+  it("forwards the pinned source and retains compatible alternatives on the external deadline", async () => {
+    const pending = queryZ3RecordAnalysis(
+      createStandardWorkspace(7),
+      "death-source",
+      { budgetMs: 1, includeAssumptions: false },
+    );
+    const worker = FakeWorker.instances[0];
+    expect(worker.request).toMatchObject({
+      kind: "record_analysis",
+      sourceId: "death-source",
+      options: { budgetMs: 1, includeAssumptions: false },
+    });
+    worker.progress(progress);
+    await vi.advanceTimersByTimeAsync(5001);
+    const answer = await pending;
+    expect(answer).toMatchObject({
+      status: "partial",
+      complete: false,
+      baselineConflict: true,
+    });
+    expect(answer.alternatives).toEqual(progress.alternatives);
+    expect(worker.terminate).toHaveBeenCalledOnce();
+  });
+  it("cancels and ignores late progress or a final result from the terminated worker", async () => {
+    const controller = new AbortController();
+    const onProgress = vi.fn();
+    const pending = queryZ3RecordAnalysis(
+      createStandardWorkspace(7),
+      "death-source",
+      {},
+      controller.signal,
+      onProgress,
+    );
+    const rejected = expect(pending).rejects.toMatchObject({
+      name: "AbortError",
+    });
+    const worker = FakeWorker.instances[0];
+    worker.progress(progress);
+    controller.abort();
+    await rejected;
+    worker.progress({ ...progress, complete: true });
+    worker.result({ ...progress, status: "confirmed", complete: true });
+    expect(onProgress).toHaveBeenCalledExactlyOnceWith(progress);
+    expect(worker.terminate).toHaveBeenCalledOnce();
+    expect(vi.getTimerCount()).toBe(0);
+  });
+  it("does not fabricate an original conflict before the first confirmed progress", async () => {
+    const pending = queryZ3RecordAnalysis(
+      createStandardWorkspace(7),
+      "death-source",
+      { budgetMs: 1 },
+    );
+    const rejected = expect(pending).rejects.toThrow("结果未知");
+    await vi.advanceTimersByTimeAsync(5001);
+    await rejected;
     expect(FakeWorker.instances[0].terminate).toHaveBeenCalledOnce();
   });
 });

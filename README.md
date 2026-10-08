@@ -4,7 +4,7 @@
 
 作者：[MrHadesZz](https://github.com/MrHadesZz) · [仓库](https://github.com/MrHadesZz/BloodOnTheClocktower-Copilot) · [在线试用](https://clocktower-copilot-ten.vercel.app) · [参与开发](./CONTRIBUTING.md) · [待开发方向](./docs/roadmap.md)
 
-当前源码版本 **0.3.0**（实验性），新增提名与猎手行动纠正：提名的关联投票需明确核对，保留原文、发生顺序、私密可见性及旧分支；具体变化见 [版本记录](./CHANGELOG.md) 与 [操作说明](./docs/design/action-corrections.md)。在线试用的部署版本可能与 GitHub 源码不同。
+当前源码版本 **0.4.0**（实验性），新增[单处误录试查](./docs/design/record-analysis.md)：从冲突阶段的具体来源检查一个玩家字段或举手名单的替代，查看兼容见证后回到原记录核对；试查不修改对局。具体变化见 [版本记录](./CHANGELOG.md)。在线试用的部署版本可能与 GitHub 源码不同。
 
 它使用浏览器端 Z3 规则求解，当前没有接入大语言模型。结果帮助回看条件和可能解释，不能认定玩家撒谎，也不是官方规则裁定。规则覆盖和性能仍有待完善。
 

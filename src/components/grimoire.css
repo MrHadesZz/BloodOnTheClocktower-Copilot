@@ -1056,6 +1056,25 @@
 .gr-action-correction .gr-action-buttons button {
   margin: 0;
 }
+.gr-record-analysis {
+  margin: 14px 0;
+  padding: 12px;
+  border: 1px solid #c9bdab;
+  border-radius: 8px;
+  background: #f4efe5;
+}
+.gr-record-alternative {
+  min-width: 0;
+  margin: 12px 0;
+  padding: 12px;
+  background: #fff;
+  border: 1px solid #ded4c4;
+  border-radius: 8px;
+}
+.gr-record-alternative h5 {
+  font-size: 14px;
+  margin: 0 0 10px;
+}
 
 .gr-current-claim-label {
   position: absolute;

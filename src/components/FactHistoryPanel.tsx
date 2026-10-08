@@ -8,6 +8,8 @@ import { queryZ3FactHistory } from "../core/z3Client";
 import type { FactHistoryAnalysis } from "../core/factHistory";
 import { StandardWitnessCard } from "./StandardQueryResult";
 import { hypothesisLabel } from "./hypothesisLabel";
+import { isAnalyzableRecord } from "../core/recordAnalysis";
+import { RecordAnalysisPanel } from "./RecordAnalysisPanel";
 
 export function FactHistoryPanel({
   workspace,
@@ -23,6 +25,7 @@ export function FactHistoryPanel({
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   const [includeAssumptions, setIncludeAssumptions] = useState(true);
+  const [selectedRecordId, setSelectedRecordId] = useState<string>();
   const controller = useRef<AbortController | undefined>(undefined);
   const current =
     completed?.workspace === workspace ? completed.value : undefined;
@@ -38,6 +41,7 @@ export function FactHistoryPanel({
   useEffect(() => {
     setBusy(false);
     setMessage("");
+    setSelectedRecordId(undefined);
     return () => {
       controller.current?.abort();
       controller.current = undefined;
@@ -49,6 +53,7 @@ export function FactHistoryPanel({
     controller.current = operation;
     setBusy(true);
     setCompleted(undefined);
+    setSelectedRecordId(undefined);
     setMessage("");
     try {
       const value = await queryZ3FactHistory(
@@ -92,6 +97,7 @@ export function FactHistoryPanel({
           onChange={(event) => {
             setIncludeAssumptions(event.target.checked);
             setCompleted(undefined);
+            setSelectedRecordId(undefined);
             setMessage("");
           }}
         />
@@ -210,6 +216,20 @@ export function FactHistoryPanel({
                       <button onClick={() => onReviewSource(source.id)}>
                         在记录中核对{eventLabel(source)}
                       </button>
+                    )}
+                    {isAnalyzableRecord(source) && (
+                      <button onClick={() => setSelectedRecordId(source.id)}>
+                        试查单处误录
+                      </button>
+                    )}
+                    {selectedRecordId === source.id && (
+                      <RecordAnalysisPanel
+                        key={source.id}
+                        workspace={workspace}
+                        source={source}
+                        includeAssumptions={includeAssumptions}
+                        onReviewSource={onReviewSource}
+                      />
                     )}
                   </details>
                 );
