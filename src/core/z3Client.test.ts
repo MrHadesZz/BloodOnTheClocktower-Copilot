@@ -3,16 +3,18 @@ import {
   queryZ3Conflict,
   queryZ3Claims,
   queryZ3ClaimConditions,
+  queryZ3FactHistory,
 } from "./z3Client";
 import { createStandardWorkspace } from "./standardWorkspace";
 import type { ConflictAnalysis } from "./conflict";
+import type { FactHistoryAnalysis } from "./factHistory";
 
 class FakeWorker {
   static instances: FakeWorker[] = [];
   requestId = "";
   request?: { requestId: string; kind?: string; options?: unknown };
   onmessage?: (event: { data: unknown }) => void;
-  onerror?: (event: { message: string }) => void;
+  onerror?: (event: { message: string; preventDefault: () => void }) => void;
   terminate = vi.fn();
   constructor() {
     FakeWorker.instances.push(this);
@@ -28,6 +30,14 @@ class FakeWorker {
   progress(value: unknown) {
     this.onmessage?.({ data: { requestId: this.requestId, progress: value } });
   }
+  error(message = "Uncaught [object ErrorEvent]") {
+    const preventDefault = vi.fn();
+    this.onerror?.({ message, preventDefault });
+    return preventDefault;
+  }
+  result(value: unknown) {
+    this.onmessage?.({ data: { requestId: this.requestId, result: value } });
+  }
 }
 const confirmed: ConflictAnalysis = {
   status: "partial",
@@ -36,6 +46,178 @@ const confirmed: ConflictAnalysis = {
   rulesetHash: "test-v1",
   deletionWitnesses: [],
 };
+
+describe("bounded recovery from a worker error without evidence", () => {
+  it("restarts once and accepts only the replacement worker's result", async () => {
+    const pending = queryZ3FactHistory(createStandardWorkspace(7));
+    const first = FakeWorker.instances[0];
+    expect(first.error()).toHaveBeenCalledOnce();
+    const second = FakeWorker.instances[1];
+    expect(first.terminate).toHaveBeenCalledOnce();
+    expect(second.request).toEqual(first.request);
+    const answer = { status: "compatible", checks: 1 };
+    second.result(answer);
+    expect(await pending).toEqual(answer);
+    expect(second.terminate).toHaveBeenCalledOnce();
+    expect(vi.getTimerCount()).toBe(0);
+  });
+  it("stops after the second worker fails", async () => {
+    const pending = queryZ3FactHistory(createStandardWorkspace(7));
+    const rejected = expect(pending).rejects.toThrow("second failure");
+    FakeWorker.instances[0].error();
+    FakeWorker.instances[1].error("second failure");
+    await rejected;
+    expect(FakeWorker.instances).toHaveLength(2);
+    expect(
+      FakeWorker.instances.every(
+        (worker) => worker.terminate.mock.calls.length === 1,
+      ),
+    ).toBe(true);
+    expect(vi.getTimerCount()).toBe(0);
+  });
+  it("does not rerun a request which has already emitted evidence", async () => {
+    const onProgress = vi.fn();
+    const pending = queryZ3FactHistory(
+      createStandardWorkspace(7),
+      {},
+      undefined,
+      onProgress,
+    );
+    const rejected = expect(pending).rejects.toThrow("failed after proof");
+    const proof = { status: "partial", boundary: { phase: "night", cycle: 2 } };
+    FakeWorker.instances[0].progress(proof);
+    FakeWorker.instances[0].error("failed after proof");
+    await rejected;
+    expect(FakeWorker.instances).toHaveLength(1);
+    expect(onProgress).toHaveBeenCalledExactlyOnceWith(proof);
+  });
+  it("cancels the replacement worker and ignores subsequent old-worker errors", async () => {
+    const controller = new AbortController();
+    const pending = queryZ3FactHistory(
+      createStandardWorkspace(7),
+      {},
+      controller.signal,
+    );
+    const rejected = expect(pending).rejects.toMatchObject({
+      name: "AbortError",
+    });
+    const first = FakeWorker.instances[0];
+    first.error();
+    controller.abort();
+    first.error("late error");
+    await rejected;
+    expect(FakeWorker.instances).toHaveLength(2);
+    expect(FakeWorker.instances[1].terminate).toHaveBeenCalledOnce();
+    expect(vi.getTimerCount()).toBe(0);
+  });
+  it("does not extend the original deadline when the runtime is replaced", async () => {
+    const pending = queryZ3FactHistory(createStandardWorkspace(7), {
+      budgetMs: 1,
+    });
+    const rejected = expect(pending).rejects.toThrow("结果未知");
+    await vi.advanceTimersByTimeAsync(1000);
+    FakeWorker.instances[0].error();
+    await vi.advanceTimersByTimeAsync(4001);
+    await rejected;
+    expect(FakeWorker.instances[1].terminate).toHaveBeenCalledOnce();
+    expect(vi.getTimerCount()).toBe(0);
+  });
+  it("ignores old progress and results even though both attempts share the request id", async () => {
+    const onProgress = vi.fn();
+    const pending = queryZ3FactHistory(
+      createStandardWorkspace(7),
+      {},
+      undefined,
+      onProgress,
+    );
+    const first = FakeWorker.instances[0];
+    first.error();
+    first.progress({ status: "located", boundary: { phase: "day", cycle: 1 } });
+    first.result({ status: "located" });
+    expect(onProgress).not.toHaveBeenCalled();
+    const answer = { status: "unknown", checks: 1 };
+    FakeWorker.instances[1].result(answer);
+    expect(await pending).toEqual(answer);
+  });
+  it("cleans the timer and listener if worker construction is rejected by the platform", async () => {
+    vi.stubGlobal(
+      "Worker",
+      class {
+        constructor() {
+          throw new Error("construction denied");
+        }
+      },
+    );
+    await expect(
+      queryZ3FactHistory(createStandardWorkspace(7)),
+    ).rejects.toThrow("construction denied");
+    expect(vi.getTimerCount()).toBe(0);
+  });
+});
+
+describe("history diagnosis worker lifecycle", () => {
+  const progress: FactHistoryAnalysis = {
+    status: "partial",
+    revision: 8,
+    assumptionIds: [],
+    checks: 2,
+    complete: false,
+    boundary: { phase: "day", cycle: 2 },
+    sourceIds: ["execution"],
+    steps: [
+      {
+        time: { phase: "day", cycle: 2 },
+        status: "conflict",
+        sourceIds: ["execution"],
+      },
+    ],
+  };
+  it("retains verified prefix evidence on external deadline without certifying the earliest boundary", async () => {
+    const pending = queryZ3FactHistory(createStandardWorkspace(7), {
+      budgetMs: 1,
+    });
+    const worker = FakeWorker.instances[0];
+    worker.progress(progress);
+    await vi.advanceTimersByTimeAsync(5001);
+    const result = await pending;
+    expect(result.status).toBe("partial");
+    expect(result.boundary).toEqual(progress.boundary);
+    expect(result.sourceIds).toEqual(progress.sourceIds);
+    expect(result.complete).toBe(false);
+    expect(worker.terminate).toHaveBeenCalledOnce();
+    expect(vi.getTimerCount()).toBe(0);
+  });
+  it("cancels the worker, immediately forwards evidence, and ignores late progress", async () => {
+    const controller = new AbortController();
+    const onProgress = vi.fn();
+    const pending = queryZ3FactHistory(
+      createStandardWorkspace(7),
+      { includeAssumptions: false },
+      controller.signal,
+      onProgress,
+    );
+    const worker = FakeWorker.instances[0];
+    expect(worker.request?.kind).toBe("fact_history");
+    expect(worker.request?.options).toEqual({ includeAssumptions: false });
+    worker.progress(progress);
+    expect(onProgress).toHaveBeenCalledWith(progress);
+    controller.abort();
+    await expect(pending).rejects.toMatchObject({ name: "AbortError" });
+    worker.progress({ ...progress, complete: true });
+    expect(onProgress).toHaveBeenCalledOnce();
+    expect(worker.terminate).toHaveBeenCalledOnce();
+    expect(vi.getTimerCount()).toBe(0);
+  });
+  it("returns unknown if initialization ends without confirmed progress", async () => {
+    const pending = queryZ3FactHistory(createStandardWorkspace(7), {
+      budgetMs: 1,
+    });
+    const rejection = expect(pending).rejects.toThrow("结果未知");
+    await vi.advanceTimersByTimeAsync(5001);
+    await rejection;
+    expect(FakeWorker.instances[0].terminate).toHaveBeenCalledOnce();
+  });
+});
 
 beforeEach(() => {
   vi.useFakeTimers();

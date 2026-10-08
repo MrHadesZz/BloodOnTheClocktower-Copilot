@@ -10,6 +10,11 @@ import {
 
 import { analyzeStandardConflict, type ConflictAnalysis } from "./conflict";
 import {
+  analyzeFactHistory,
+  type FactHistoryAnalysis,
+  type FactHistoryOptions,
+} from "./factHistory";
+import {
   analyzeClaims,
   type ClaimAnalysis,
   type ClaimAnalysisOptions,
@@ -29,11 +34,12 @@ export interface EngineRequest {
     | "timeline_query"
     | "observed_query"
     | "conflict_query"
+    | "fact_history"
     | "claim_analysis"
     | "claim_diagnosis";
   workspace?: StandardWorkspace;
   seats?: number[];
-  options?: ClaimAnalysisOptions;
+  options?: ClaimAnalysisOptions & FactHistoryOptions;
   input?: SetupQueryInput | TimelineQueryInput | ObservedQueryInput;
 }
 
@@ -41,9 +47,22 @@ export interface EngineRequest {
 export async function handle(
   request: EngineRequest,
   onProgress?: (
-    analysis: ConflictAnalysis | ClaimAnalysis | ClaimConditionDiagnosis,
+    analysis:
+      | ConflictAnalysis
+      | ClaimAnalysis
+      | ClaimConditionDiagnosis
+      | FactHistoryAnalysis,
   ) => void,
 ) {
+  if (request.kind === "fact_history") {
+    if (!request.workspace) throw new Error("缺少阶段核对输入。");
+    return analyzeFactHistory(
+      request.workspace,
+      { setup: queryInitialSetup, observed: queryObservedTimeline },
+      request.options,
+      onProgress,
+    );
+  }
   if (request.kind === "claim_diagnosis") {
     if (!request.workspace || !request.seats) throw new Error("缺少细查输入。");
     return analyzeClaimConditions(

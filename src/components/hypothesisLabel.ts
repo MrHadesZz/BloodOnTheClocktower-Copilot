@@ -15,9 +15,13 @@ export function hypothesisLabel(
   if (h.kind === "seen_token") return `${h.seat}号所见${ROLE_ZH[h.shownRole]}`;
   if (h.kind === "night_one_poison")
     return `首夜${h.poisonerSeat}号投毒${h.targetSeat}号`;
+  const revision =
+    workspace.branches.find((b) => b.id === workspace.activeBranchId)
+      ?.baseRevision ?? 0;
   const source = workspace.events.find(
     (e) =>
       e.id === h.eventId &&
+      e.revision <= revision &&
       (e.visibility === "public" || e.ownerSeat === workspace.perspectiveSeat),
   );
   return `${h.kind === "report_accurate" ? "准确转述" : "能力有效"} · ${source ? `${eventLabel(source)} · ${timeLabel(source.occurredAt)}` : "来源不可见"}`;

@@ -7,6 +7,7 @@ import type {
 } from "./symbolicSetup";
 
 import type { ConflictAnalysis, ConflictOptions } from "./conflict";
+import type { FactHistoryAnalysis, FactHistoryOptions } from "./factHistory";
 import type { ClaimAnalysis, ClaimAnalysisOptions } from "./claimAnalysis";
 import type { ClaimConditionDiagnosis } from "./claimConditionAnalysis";
 import type { StandardWorkspace } from "./standardWorkspace";
@@ -18,6 +19,11 @@ export interface Z3ProbeResult {
 }
 
 type Request =
+  | {
+      kind: "fact_history";
+      workspace: StandardWorkspace;
+      options?: FactHistoryOptions;
+    }
   | {
       kind: "conflict_query" | "claim_analysis";
       workspace: StandardWorkspace;
@@ -49,7 +55,8 @@ function requestZ3<T>(
       reject(new Error("此浏览器或站点缺少运行 Z3 所需的跨源隔离。"));
       return;
     }
-    const worker = new Worker(`/z3/worker-host.js?v=${__Z3_ENGINE_VERSION__}`);
+    let worker: Worker | undefined;
+    let attempts = 0;
     const requestId = crypto.randomUUID();
     let settled = false;
     let progress: T | undefined;
@@ -59,7 +66,7 @@ function requestZ3<T>(
       settled = true;
       signal?.removeEventListener("abort", abort);
       clearTimeout(timer);
-      worker.terminate();
+      worker?.terminate();
       if (cancelled) reject(new DOMException("已取消查询", "AbortError"));
       else if (error) reject(new Error(error));
       else resolve(value as T);
@@ -71,24 +78,48 @@ function requestZ3<T>(
           : finish(null, "Z3 查询超时，结果未知。"),
       timeoutMs,
     );
-    worker.onmessage = (
-      event: MessageEvent<{
-        requestId: string;
-        result?: T;
-        progress?: T;
-        error?: string;
-      }>,
-    ) => {
-      if (settled || event.data.requestId !== requestId) return;
-      if (event.data.progress !== undefined) {
-        progress = event.data.progress;
-        onProgress?.(progress);
-      } else finish(event.data.result ?? null, event.data.error);
+    const start = () => {
+      let attempt: Worker;
+      try {
+        attempt = new Worker(`/z3/worker-host.js?v=${__Z3_ENGINE_VERSION__}`);
+      } catch (error) {
+        finish(
+          null,
+          error instanceof Error ? error.message : "Z3 Worker 无法创建。",
+        );
+        return;
+      }
+      worker = attempt;
+      attempts++;
+      attempt.onmessage = (
+        event: MessageEvent<{
+          requestId: string;
+          result?: T;
+          progress?: T;
+          error?: string;
+        }>,
+      ) => {
+        if (settled || worker !== attempt || event.data.requestId !== requestId)
+          return;
+        if (event.data.progress !== undefined) {
+          progress = event.data.progress;
+          onProgress?.(progress);
+        } else finish(event.data.result ?? null, event.data.error);
+      };
+      attempt.onerror = (event) => {
+        event.preventDefault();
+        if (settled || worker !== attempt) return;
+        // One fresh runtime is allowed before any evidence; the original deadline remains.
+        if (attempts === 1 && progress === undefined) {
+          attempt.terminate();
+          start();
+        } else finish(null, event.message || "Z3 Worker 加载失败。");
+      };
+      attempt.postMessage({ ...request, requestId });
     };
-    worker.onerror = (event) =>
-      finish(null, event.message || "Z3 Worker 加载失败。");
     signal?.addEventListener("abort", abort, { once: true });
-    worker.postMessage({ ...request, requestId });
+    if (signal?.aborted) abort();
+    else start();
   });
 }
 
@@ -126,6 +157,25 @@ export const queryZ3Conflict = (
       status: "partial",
       reason: "定位达到时间预算，保留已确认的冲突；最小性未验证完成。",
     }),
+  );
+
+export const queryZ3FactHistory = (
+  workspace: StandardWorkspace,
+  options: FactHistoryOptions = {},
+  signal?: AbortSignal,
+  onProgress?: (progress: FactHistoryAnalysis) => void,
+) =>
+  requestZ3<FactHistoryAnalysis>(
+    { kind: "fact_history", workspace, options },
+    Math.min(Math.max(options.budgetMs ?? 30000, 0), 60000) + 5000,
+    signal,
+    (progress) => ({
+      ...progress,
+      complete: false,
+      status: progress.boundary ? "partial" : "unknown",
+      reason: "阶段定位达到时间预算，保留已确认的证据；最早边界尚未验证。",
+    }),
+    onProgress,
   );
 
 export const queryZ3Claims = (

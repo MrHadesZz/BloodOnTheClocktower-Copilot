@@ -34,7 +34,7 @@ var ClocktowerZ3 = (() => {
   ));
   var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
 
-  // node_modules/tslib/tslib.es6.mjs
+  // ../../../../../../../../../../home/fabi/clocktower_copilot/node_modules/tslib/tslib.es6.mjs
   var tslib_es6_exports = {};
   __export(tslib_es6_exports, {
     __addDisposableResource: () => __addDisposableResource,
@@ -473,7 +473,7 @@ var ClocktowerZ3 = (() => {
   }
   var extendStatics, __assign, __createBinding, __setModuleDefault, ownKeys, _SuppressedError, tslib_es6_default;
   var init_tslib_es6 = __esm({
-    "node_modules/tslib/tslib.es6.mjs"() {
+    "../../../../../../../../../../home/fabi/clocktower_copilot/node_modules/tslib/tslib.es6.mjs"() {
       extendStatics = function(d, b) {
         extendStatics = Object.setPrototypeOf || { __proto__: [] } instanceof Array && function(d2, b2) {
           d2.__proto__ = b2;
@@ -559,9 +559,9 @@ var ClocktowerZ3 = (() => {
     }
   });
 
-  // node_modules/async-mutex/lib/errors.js
+  // ../../../../../../../../../../home/fabi/clocktower_copilot/node_modules/async-mutex/lib/errors.js
   var require_errors = __commonJS({
-    "node_modules/async-mutex/lib/errors.js"(exports) {
+    "../../../../../../../../../../home/fabi/clocktower_copilot/node_modules/async-mutex/lib/errors.js"(exports) {
       "use strict";
       Object.defineProperty(exports, "__esModule", { value: true });
       exports.E_CANCELED = exports.E_ALREADY_LOCKED = exports.E_TIMEOUT = void 0;
@@ -571,9 +571,9 @@ var ClocktowerZ3 = (() => {
     }
   });
 
-  // node_modules/async-mutex/lib/Semaphore.js
+  // ../../../../../../../../../../home/fabi/clocktower_copilot/node_modules/async-mutex/lib/Semaphore.js
   var require_Semaphore = __commonJS({
-    "node_modules/async-mutex/lib/Semaphore.js"(exports) {
+    "../../../../../../../../../../home/fabi/clocktower_copilot/node_modules/async-mutex/lib/Semaphore.js"(exports) {
       "use strict";
       Object.defineProperty(exports, "__esModule", { value: true });
       var tslib_1 = (init_tslib_es6(), __toCommonJS(tslib_es6_exports));
@@ -698,9 +698,9 @@ var ClocktowerZ3 = (() => {
     }
   });
 
-  // node_modules/async-mutex/lib/Mutex.js
+  // ../../../../../../../../../../home/fabi/clocktower_copilot/node_modules/async-mutex/lib/Mutex.js
   var require_Mutex = __commonJS({
-    "node_modules/async-mutex/lib/Mutex.js"(exports) {
+    "../../../../../../../../../../home/fabi/clocktower_copilot/node_modules/async-mutex/lib/Mutex.js"(exports) {
       "use strict";
       Object.defineProperty(exports, "__esModule", { value: true });
       var tslib_1 = (init_tslib_es6(), __toCommonJS(tslib_es6_exports));
@@ -749,9 +749,9 @@ var ClocktowerZ3 = (() => {
     }
   });
 
-  // node_modules/async-mutex/lib/withTimeout.js
+  // ../../../../../../../../../../home/fabi/clocktower_copilot/node_modules/async-mutex/lib/withTimeout.js
   var require_withTimeout = __commonJS({
-    "node_modules/async-mutex/lib/withTimeout.js"(exports) {
+    "../../../../../../../../../../home/fabi/clocktower_copilot/node_modules/async-mutex/lib/withTimeout.js"(exports) {
       "use strict";
       Object.defineProperty(exports, "__esModule", { value: true });
       exports.withTimeout = void 0;
@@ -867,9 +867,9 @@ var ClocktowerZ3 = (() => {
     }
   });
 
-  // node_modules/async-mutex/lib/tryAcquire.js
+  // ../../../../../../../../../../home/fabi/clocktower_copilot/node_modules/async-mutex/lib/tryAcquire.js
   var require_tryAcquire = __commonJS({
-    "node_modules/async-mutex/lib/tryAcquire.js"(exports) {
+    "../../../../../../../../../../home/fabi/clocktower_copilot/node_modules/async-mutex/lib/tryAcquire.js"(exports) {
       "use strict";
       Object.defineProperty(exports, "__esModule", { value: true });
       exports.tryAcquire = void 0;
@@ -885,9 +885,9 @@ var ClocktowerZ3 = (() => {
     }
   });
 
-  // node_modules/async-mutex/lib/index.js
+  // ../../../../../../../../../../home/fabi/clocktower_copilot/node_modules/async-mutex/lib/index.js
   var require_lib = __commonJS({
-    "node_modules/async-mutex/lib/index.js"(exports) {
+    "../../../../../../../../../../home/fabi/clocktower_copilot/node_modules/async-mutex/lib/index.js"(exports) {
       "use strict";
       Object.defineProperty(exports, "__esModule", { value: true });
       exports.tryAcquire = exports.withTimeout = exports.Semaphore = exports.Mutex = void 0;
@@ -912,9 +912,9 @@ var ClocktowerZ3 = (() => {
     }
   });
 
-  // node_modules/z3-solver/build/low-level/types.__GENERATED__.js
+  // ../../../../../../../../../../home/fabi/clocktower_copilot/node_modules/z3-solver/build/low-level/types.__GENERATED__.js
   var require_types_GENERATED = __commonJS({
-    "node_modules/z3-solver/build/low-level/types.__GENERATED__.js"(exports) {
+    "../../../../../../../../../../home/fabi/clocktower_copilot/node_modules/z3-solver/build/low-level/types.__GENERATED__.js"(exports) {
       "use strict";
       Object.defineProperty(exports, "__esModule", { value: true });
       exports.Z3_goal_prec = exports.Z3_error_code = exports.Z3_ast_print_mode = exports.Z3_param_kind = exports.Z3_decl_kind = exports.Z3_ast_kind = exports.Z3_sort_kind = exports.Z3_parameter_kind = exports.Z3_symbol_kind = exports.Z3_lbool = void 0;
@@ -1307,9 +1307,9 @@ var ClocktowerZ3 = (() => {
     }
   });
 
-  // node_modules/z3-solver/build/low-level/wrapper.__GENERATED__.js
+  // ../../../../../../../../../../home/fabi/clocktower_copilot/node_modules/z3-solver/build/low-level/wrapper.__GENERATED__.js
   var require_wrapper_GENERATED = __commonJS({
-    "node_modules/z3-solver/build/low-level/wrapper.__GENERATED__.js"(exports) {
+    "../../../../../../../../../../home/fabi/clocktower_copilot/node_modules/z3-solver/build/low-level/wrapper.__GENERATED__.js"(exports) {
       "use strict";
       Object.defineProperty(exports, "__esModule", { value: true });
       exports.init = init3;
@@ -3444,9 +3444,9 @@ var ClocktowerZ3 = (() => {
     }
   });
 
-  // node_modules/z3-solver/build/low-level/index.js
+  // ../../../../../../../../../../home/fabi/clocktower_copilot/node_modules/z3-solver/build/low-level/index.js
   var require_low_level = __commonJS({
-    "node_modules/z3-solver/build/low-level/index.js"(exports) {
+    "../../../../../../../../../../home/fabi/clocktower_copilot/node_modules/z3-solver/build/low-level/index.js"(exports) {
       "use strict";
       var __createBinding2 = exports && exports.__createBinding || (Object.create ? (function(o, m, k, k2) {
         if (k2 === void 0) k2 = k;
@@ -3470,9 +3470,9 @@ var ClocktowerZ3 = (() => {
     }
   });
 
-  // node_modules/z3-solver/build/high-level/types.js
+  // ../../../../../../../../../../home/fabi/clocktower_copilot/node_modules/z3-solver/build/high-level/types.js
   var require_types = __commonJS({
-    "node_modules/z3-solver/build/high-level/types.js"(exports) {
+    "../../../../../../../../../../home/fabi/clocktower_copilot/node_modules/z3-solver/build/high-level/types.js"(exports) {
       "use strict";
       Object.defineProperty(exports, "__esModule", { value: true });
       exports.Z3AssertionError = exports.Z3Error = void 0;
@@ -3485,9 +3485,9 @@ var ClocktowerZ3 = (() => {
     }
   });
 
-  // node_modules/z3-solver/build/high-level/utils.js
+  // ../../../../../../../../../../home/fabi/clocktower_copilot/node_modules/z3-solver/build/high-level/utils.js
   var require_utils = __commonJS({
-    "node_modules/z3-solver/build/high-level/utils.js"(exports) {
+    "../../../../../../../../../../home/fabi/clocktower_copilot/node_modules/z3-solver/build/high-level/utils.js"(exports) {
       "use strict";
       Object.defineProperty(exports, "__esModule", { value: true });
       exports.assertExhaustive = assertExhaustive;
@@ -3515,9 +3515,9 @@ var ClocktowerZ3 = (() => {
     }
   });
 
-  // node_modules/z3-solver/build/high-level/high-level.js
+  // ../../../../../../../../../../home/fabi/clocktower_copilot/node_modules/z3-solver/build/high-level/high-level.js
   var require_high_level = __commonJS({
-    "node_modules/z3-solver/build/high-level/high-level.js"(exports) {
+    "../../../../../../../../../../home/fabi/clocktower_copilot/node_modules/z3-solver/build/high-level/high-level.js"(exports) {
       "use strict";
       Object.defineProperty(exports, "__esModule", { value: true });
       exports.createApi = createApi;
@@ -7551,9 +7551,9 @@ var ClocktowerZ3 = (() => {
     }
   });
 
-  // node_modules/z3-solver/build/high-level/index.js
+  // ../../../../../../../../../../home/fabi/clocktower_copilot/node_modules/z3-solver/build/high-level/index.js
   var require_high_level2 = __commonJS({
-    "node_modules/z3-solver/build/high-level/index.js"(exports) {
+    "../../../../../../../../../../home/fabi/clocktower_copilot/node_modules/z3-solver/build/high-level/index.js"(exports) {
       "use strict";
       var __createBinding2 = exports && exports.__createBinding || (Object.create ? (function(o, m, k, k2) {
         if (k2 === void 0) k2 = k;
@@ -7577,9 +7577,9 @@ var ClocktowerZ3 = (() => {
     }
   });
 
-  // node_modules/z3-solver/build/browser.js
+  // ../../../../../../../../../../home/fabi/clocktower_copilot/node_modules/z3-solver/build/browser.js
   var require_browser = __commonJS({
-    "node_modules/z3-solver/build/browser.js"(exports) {
+    "../../../../../../../../../../home/fabi/clocktower_copilot/node_modules/z3-solver/build/browser.js"(exports) {
       "use strict";
       var __createBinding2 = exports && exports.__createBinding || (Object.create ? (function(o, m, k, k2) {
         if (k2 === void 0) k2 = k;
@@ -8979,8 +8979,8 @@ var ClocktowerZ3 = (() => {
   }
   function matchObservedTimeline(witness, input, setupInput, deadline, acceptFinalState, finalRoleConstraint) {
     const n = witness.roles.length;
-    const limit = input.maxHistories ?? 1e4;
-    if (!Number.isInteger(limit) || limit < 1)
+    const limit2 = input.maxHistories ?? 1e4;
+    if (!Number.isInteger(limit2) || limit2 < 1)
       throw new RangeError("\u9690\u85CF\u884C\u52A8\u641C\u7D22\u4E0A\u9650\u65E0\u6548\u3002");
     if (!input.phases.length || input.phases[0]?.kind !== "night")
       throw new RangeError("\u89C2\u5BDF\u65F6\u95F4\u7EBF\u5FC5\u987B\u4ECE\u9996\u591C\u5F00\u59CB\u3002");
@@ -9008,7 +9008,7 @@ var ClocktowerZ3 = (() => {
         unknown = { status: "unknown", reason: "time_budget", inspected };
         return false;
       }
-      if (inspected >= limit) {
+      if (inspected >= limit2) {
         unknown = { status: "unknown", reason: "candidate_limit", inspected };
         return false;
       }
@@ -10017,7 +10017,7 @@ var ClocktowerZ3 = (() => {
       while (original.correctsEventId !== void 0) {
         const previous = historical.get(original.correctsEventId);
         if (!previous || previous.revision >= original.revision)
-          throw new Error("\u6295\u7968\u7EA0\u6B63\u7684\u539F\u8BB0\u5F55\u6216\u987A\u5E8F\u65E0\u6548\u3002");
+          throw new Error("\u7EA0\u6B63\u8BB0\u5F55\u7684\u539F\u8BB0\u5F55\u6216\u987A\u5E8F\u65E0\u6548\u3002");
         original = previous;
       }
       return original.revision;
@@ -10354,6 +10354,189 @@ var ClocktowerZ3 = (() => {
         "\u4E0D\u91C7\u7EB3\u4EFB\u4F55\u5047\u8BBE\u4ECD\u7136\u51B2\u7A81\uFF0C\u8BF7\u6838\u5BF9\u56FA\u5B9A\u4E8B\u5B9E\u8BB0\u5F55\u3002"
       );
     return finish(unknownReason ? "partial" : "minimal", unknownReason);
+  }
+
+  // src/core/factHistory.ts
+  var order = (time) => (time.cycle - 1) * 2 + (time.phase === "day" ? 1 : 0);
+  var limit = (value, fallback, max) => Number.isFinite(value) ? Math.max(0, Math.min(value, max)) : fallback;
+  async function analyzeFactHistory(workspace, solvers, options = {}, onProgress) {
+    const branch = workspace.branches.find(
+      (b) => b.id === workspace.activeBranchId
+    );
+    if (!branch) throw new Error("\u6D3B\u52A8\u5206\u652F\u4E0D\u5B58\u5728\u3002");
+    const assumptionIds = options.includeAssumptions === false ? [] : [...branch.assumptionIds];
+    const snapshot = {
+      ...workspace,
+      query: { ...workspace.query, stage: "initial" },
+      branches: workspace.branches.map(
+        (b) => b.id === branch.id ? { ...b, assumptionIds } : b
+      )
+    };
+    const visible = visibleStandardEvents(
+      snapshot,
+      snapshot.perspectiveSeat,
+      branch.baseRevision
+    );
+    const started = performance.now();
+    const budget = limit(options.budgetMs, 3e4, 6e4);
+    const maxChecks = Math.floor(limit(options.maxChecks, 40, 200));
+    const steps = /* @__PURE__ */ new Map();
+    let checks = 0;
+    let rulesetHash;
+    let boundary;
+    let previous;
+    let witness;
+    let sources = [];
+    const finish = (status, reason) => ({
+      status,
+      revision: branch.baseRevision,
+      assumptionIds: [...assumptionIds],
+      checks,
+      complete: status === "located" || status === "compatible",
+      rulesetHash,
+      boundary: boundary && { ...boundary },
+      sourceIds: [...sources],
+      previous,
+      witness,
+      reason,
+      steps: [...steps.values()].sort((a, b) => order(a.time) - order(b.time)).map((step) => ({
+        ...step,
+        time: { ...step.time },
+        sourceIds: [...step.sourceIds]
+      }))
+    });
+    const check = async (solve) => {
+      const remaining = budget - (performance.now() - started);
+      if (remaining <= 0 || checks >= maxChecks)
+        return {
+          kind: "unknown",
+          reason: "\u9636\u6BB5\u5B9A\u4F4D\u8FBE\u5230\u65F6\u95F4\u6216\u68C0\u67E5\u6B21\u6570\u9884\u7B97\u3002"
+        };
+      checks++;
+      try {
+        const answer = await solve(
+          Math.max(
+            1,
+            Math.floor(
+              Math.min(remaining, limit(options.checkTimeoutMs, 5e3, 6e4))
+            )
+          )
+        );
+        if (rulesetHash && rulesetHash !== answer.rulesetHash)
+          return {
+            kind: "unknown",
+            reason: "\u89C4\u5219\u7248\u672C\u53D1\u751F\u53D8\u5316\uFF0C\u4E0D\u80FD\u5408\u5E76\u9636\u6BB5\u8BC1\u636E\u3002",
+            changedRules: true
+          };
+        rulesetHash = answer.rulesetHash;
+        if (answer.status === "unsat" && answer.classification === "inconsistent")
+          return { kind: "conflict" };
+        const proof = answer.yes ?? answer.no;
+        if (proof) return { kind: "compatible", witness: proof };
+        return {
+          kind: "unknown",
+          reason: answer.unknownReason === "unsupported_replay" ? "\u5B58\u5728\u5C1A\u672A\u652F\u6301\u7684\u89C4\u5219\u4EA4\u4E92\u3002" : answer.unknownReason === "candidate_limit" ? "\u5019\u9009\u6216\u9690\u85CF\u884C\u52A8\u641C\u7D22\u8FBE\u5230\u4E0A\u9650\u3002" : "\u672C\u6B21\u68C0\u67E5\u672A\u5B8C\u6210\uFF0C\u5C1A\u672A\u627E\u5230\u53EF\u91CD\u653E\u89C1\u8BC1\u3002"
+        };
+      } catch (error) {
+        return {
+          kind: "unknown",
+          reason: error instanceof Error ? error.message : "\u672C\u6B21\u9636\u6BB5\u68C0\u67E5\u672A\u5B8C\u6210\u3002"
+        };
+      }
+    };
+    const physical = visible.some((e) => e.payload.kind !== "claim");
+    if (!physical) {
+      const prepared2 = prepareStandardSetupQuery(snapshot);
+      if (prepared2.status !== "ready")
+        return finish("not_ready", prepared2.reason);
+      const answer = await check(
+        (timeoutMs) => solvers.setup({ ...prepared2.input, timeoutMs })
+      );
+      if (answer.kind === "compatible") {
+        witness = answer.witness;
+        return finish(
+          "compatible",
+          "\u5F53\u524D\u6CA1\u6709\u65E5\u591C\u4E8B\u4EF6\uFF1B\u8BBE\u7F6E\u4E0E\u672C\u6B21\u4FDD\u7559\u524D\u63D0\u5DF2\u6709\u517C\u5BB9\u89C1\u8BC1\u3002"
+        );
+      }
+      if (answer.kind === "conflict")
+        return finish(
+          "partial",
+          "\u5C1A\u65E0\u65E5\u591C\u4E8B\u4EF6\uFF0C\u51B2\u7A81\u6765\u81EA\u8BBE\u7F6E\u6216\u624B\u52A8\u524D\u63D0\uFF0C\u8BF7\u4F7F\u7528\u524D\u63D0\u51B2\u7A81\u5B9A\u4F4D\u3002"
+        );
+      return finish("unknown", answer.reason);
+    }
+    const prepared = prepareStandardObservedQuery(snapshot);
+    if (prepared.status !== "ready") return finish("not_ready", prepared.reason);
+    const input = prepared.input;
+    const sourcesAt = (time) => visible.filter(
+      (e) => prepared.sourceIds.includes(e.id) && e.occurredAt && order(e.occurredAt) === order(time)
+    ).map((e) => e.id);
+    const inspect = async (length) => {
+      const last = input.phases[length - 1];
+      const time = { phase: last.kind, cycle: last.cycle };
+      const answer = await check(
+        (timeoutMs) => solvers.observed({
+          ...input,
+          phases: input.phases.slice(0, length),
+          laterReports: input.laterReports?.filter((r) => r.cycle <= time.cycle),
+          phaseRoleFacts: input.phaseRoleFacts?.filter(
+            (f) => f.phaseIndex < length
+          ),
+          timeoutMs
+        })
+      );
+      const step = {
+        time,
+        status: answer.kind,
+        sourceIds: sourcesAt(time),
+        ...answer.kind === "unknown" ? { reason: answer.reason } : {}
+      };
+      if (!(answer.kind === "unknown" && "changedRules" in answer))
+        steps.set(length - 1, step);
+      if (answer.kind === "conflict") {
+        boundary = time;
+        sources = step.sourceIds;
+      }
+      return { time, answer };
+    };
+    const full = await inspect(input.phases.length);
+    if (full.answer.kind === "compatible") {
+      witness = full.answer.witness;
+      return finish(
+        "compatible",
+        "\u5B8C\u6574\u8BB0\u5F55\u5DF2\u6709\u4E00\u79CD\u517C\u5BB9\u89E3\u91CA\uFF1B\u8FD9\u4E0D\u8BC1\u660E\u6240\u6709\u8BB0\u5F55\u6216\u58F0\u79F0\u771F\u5B9E\u3002"
+      );
+    }
+    onProgress?.(
+      finish(boundary ? "partial" : "unknown", "\u6B63\u5728\u68C0\u67E5\u66F4\u65E9\u7684\u5B8C\u6574\u9636\u6BB5\u3002")
+    );
+    let unresolved;
+    for (let length = 1; length <= input.phases.length; length++) {
+      if (length < input.phases.length && (budget - (performance.now() - started) <= 0 || checks >= maxChecks))
+        return finish(
+          boundary ? "partial" : "unknown",
+          "\u9636\u6BB5\u5B9A\u4F4D\u8FBE\u5230\u9884\u7B97\uFF0C\u4FDD\u7559\u5DF2\u786E\u8BA4\u7684\u8BC1\u636E\uFF1B\u6700\u65E9\u8FB9\u754C\u5C1A\u672A\u9A8C\u8BC1\u3002"
+        );
+      const current = length === input.phases.length ? full : await inspect(length);
+      const answer = current.answer;
+      if (answer.kind === "conflict")
+        return finish(
+          unresolved ? "partial" : "located",
+          unresolved ? `\u622A\u81F3${current.time.phase === "day" ? "D" : "N"}${current.time.cycle}\u7684\u8BB0\u5F55\u5DF2\u786E\u8BA4\u51B2\u7A81\uFF0C\u4F46\u66F4\u65E9\u9636\u6BB5\u4ECD\u6709\u672A\u77E5\uFF1A${unresolved}` : "\u6B64\u524D\u6BCF\u4E2A\u5B8C\u6574\u9636\u6BB5\u5747\u6709\u517C\u5BB9\u89C1\u8BC1\uFF1B\u52A0\u5165\u672C\u9636\u6BB5\u540E\u9996\u6B21\u786E\u8BA4\u51B2\u7A81\u3002\u8BF7\u7ED3\u5408\u6B64\u524D\u8BB0\u5F55\u6838\u5BF9\u672C\u9636\u6BB5\u6765\u6E90\uFF0C\u8FD9\u4E0D\u662F\u6765\u6E90\u7EA7\u6700\u5C0F\u51B2\u7A81\u96C6\u3002"
+        );
+      if (answer.kind === "compatible")
+        previous = { time: current.time, witness: answer.witness };
+      else {
+        if ("changedRules" in answer)
+          return finish(boundary ? "partial" : "unknown", answer.reason);
+        unresolved ??= answer.reason;
+      }
+      onProgress?.(
+        finish(boundary ? "partial" : "unknown", "\u6B63\u5728\u68C0\u67E5\u66F4\u65E9\u7684\u5B8C\u6574\u9636\u6BB5\u3002")
+      );
+    }
+    return finish("unknown", unresolved ?? "\u5B8C\u6574\u5386\u53F2\u7684\u68C0\u67E5\u672A\u5B8C\u6210\u3002");
   }
 
   // src/core/standardHistory.ts
@@ -10807,6 +10990,15 @@ var ClocktowerZ3 = (() => {
 
   // src/core/z3-engine.ts
   async function handle(request, onProgress) {
+    if (request.kind === "fact_history") {
+      if (!request.workspace) throw new Error("\u7F3A\u5C11\u9636\u6BB5\u6838\u5BF9\u8F93\u5165\u3002");
+      return analyzeFactHistory(
+        request.workspace,
+        { setup: queryInitialSetup, observed: queryObservedTimeline },
+        request.options,
+        onProgress
+      );
+    }
     if (request.kind === "claim_diagnosis") {
       if (!request.workspace || !request.seats) throw new Error("\u7F3A\u5C11\u7EC6\u67E5\u8F93\u5165\u3002");
       return analyzeClaimConditions(

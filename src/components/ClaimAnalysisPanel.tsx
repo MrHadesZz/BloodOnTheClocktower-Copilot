@@ -11,11 +11,14 @@ import {
 } from "../core/standardWorkspace";
 import { ClaimRepairCard } from "./ClaimRepairCard";
 import { StandardWitnessCard } from "./StandardQueryResult";
+import { FactHistoryPanel } from "./FactHistoryPanel";
 
 export function ClaimAnalysisPanel({
   workspace,
+  onReviewSource,
 }: {
   workspace: StandardWorkspace;
+  onReviewSource?: (id: string) => void;
 }) {
   const [attempt, setAttempt] = useState(0);
   const [completed, setCompleted] = useState<{
@@ -280,6 +283,12 @@ export function ClaimAnalysisPanel({
             </>
           )}
           {result.reason && <p>{result.reason}</p>}
+          {result.status === "fixed_conflict" && (
+            <FactHistoryPanel
+              workspace={workspace}
+              onReviewSource={onReviewSource}
+            />
+          )}
           {!result.complete && (
             <p>
               {busy
